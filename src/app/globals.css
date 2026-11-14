@@ -1,0 +1,569 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+
+  /* ==========================================================================
+     1. PALETTE & COLOR TOKENS
+     ========================================================================== */
+
+  /* Figma MCP-verified tokens (frame 1:32, Vignette 1:54, Navbar 1:1473, Beams 1:40) */
+  --background: #1a1a1a;
+  --foreground: #ffffff;
+  --brand-red: #ff2332;
+  --nav-muted: rgba(255, 255, 255, 0.5); /* #ffffff at 0.5 opacity */
+
+  /* Code-verified Hero / Navbar interactive & mobile popover baseline */
+  --brand-red-hover: #e51c2a;
+  --hero-lead-muted: rgba(255, 255, 255, 0.55);
+  --surface-popover: #202020;
+  --border-popover: rgba(255, 255, 255, 0.12);
+  --menu-button-bg: rgba(26, 26, 26, 0.92);
+  --menu-button-border: rgba(255, 255, 255, 0.16);
+  --menu-backdrop: rgba(0, 0, 0, 0.55);
+
+  /* Provisional — sampled from lossless Figma PNG exports (Sections 3–10,
+     where direct MCP get_design_context inspection was blocked by Starter plan quota) */
+  --surface: #1f1f1f; /* Elevated card/band surface (LogoStrip, Stat cards, Badges, Pricing, Quote card) */
+  --muted: #909090; /* Muted copy & inactive pagination dots (~5.65:1 on #1a1a1a, ~5.28:1 on #1f1f1f) */
+  --logo-muted: #aeaeae; /* Monochrome partner logo tint on #1f1f1f surface */
+  --border-subtle: rgba(255, 255, 255, 0.25); /* Neutral pricing card border */
+  --divider-subtle: rgba(255, 255, 255, 0.25); /* FAQ accordion row separators */
+  --divider-footer: rgba(255, 255, 255, 0.5); /* Footer 1px horizontal divider */
+  --brand-glow: rgba(255, 35, 50, 0.15); /* Ambient radial glow peak (#3c1c1e over #1a1a1a) */
+
+  /* ==========================================================================
+     2. SPACING, CONTAINERS & BREAKPOINTS
+     ========================================================================== */
+
+  /* Verified Figma variable definitions (frame 1:32) */
+  --gap-xs: 0.25rem;  /* 4px */
+  --gap-sm: 0.5rem;   /* 8px */
+  --gap-lg: 1rem;     /* 16px */
+  --gap-2lg: 2rem;    /* 32px */
+  --gap-5lg: 6rem;    /* 96px */
+  --gap-6lg: 8rem;    /* 128px */
+  --desktop-width: 1440px;
+
+  /* Figma XML-measured container & grid rails at 1440px (frame 1:32) */
+  --container-wide: 1184px;         /* 1440 - 2 * gap-6lg (Footer rail) */
+  --container-about: 1174px;        /* 1173.81px (About 2-col split) */
+  --container-testimonials: 1128px; /* Testimonials carousel bounds */
+  --container-qual: 1102px;         /* 1101.81px (Qualifications 2-col split) */
+  --container-nav: 1080px;          /* Navbar inner width (1440 - 2 * 180) */
+  --container-cta: 1045px;          /* Bottom CTA 2-col split */
+  --container-pricing: 1032px;      /* Pricing 3-column grid (3 * 302 + 2 * 63) */
+  --container-faq: 959px;           /* FAQ accordion list */
+
+  /* Provisional responsive gutters & vertical section rhythm */
+  --gutter-mobile: 1.25rem;   /* 20px (matches Hero/Navbar px-5) */
+  --gutter-tablet: 2rem;      /* 32px (matches Hero/Navbar sm:px-8) */
+  --section-gap-sm: 7.375rem; /* 118px desktop gap after LogoStrip */
+  --section-gap-lg: 14rem;    /* ~224px (221px–227px major section rhythm in XML) */
+
+  /* ==========================================================================
+     3. RADII & ELEVATION
+     ========================================================================== */
+
+  /* Verified Hero/Navbar CTA radius */
+  --radius-control: 0.75rem; /* 12px */
+
+  /* Provisional PNG-sampled card & photography radii + elevation shadows */
+  --radius-card: 0.625rem;   /* ~10px (Stat cards, Badges, Pricing, Testimonial card) */
+  --radius-media: 0.75rem;   /* ~12px (About, Qualifications, Testimonial photography) */
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --shadow-popover: 0 20px 50px rgba(0, 0, 0, 0.65);
+
+  /* Safe gradient color interpolation space fallback */
+  --in-oklab: ;
+}
+
+@supports (linear-gradient(in oklab, white, black)) {
+  :root {
+    --in-oklab: in oklab;
+  }
+}
+
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: var(--brand-red);
+  --color-brand-hover: var(--brand-red-hover);
+  --color-surface: var(--surface);
+  --color-surface-popover: var(--surface-popover);
+  --color-muted: var(--muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-divider-subtle: var(--divider-subtle);
+  --color-divider-footer: var(--divider-footer);
+
+  /* Typography */
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-oxanium), ui-sans-serif, system-ui, sans-serif;
+  /* PROVISIONAL alias: Figma PNG screenshots for Sections 4–9 depict a condensed bold
+     display typeface not yet verified via MCP; maps cleanly to --font-display until confirmed. */
+  --font-section-display: var(--font-oxanium), ui-sans-serif, system-ui, sans-serif;
+
+  /* Figma spacing tokens */
+  --spacing-figma-xs: var(--gap-xs);
+  --spacing-figma-sm: var(--gap-sm);
+  --spacing-figma-lg: var(--gap-lg);
+  --spacing-figma-2lg: var(--gap-2lg);
+  --spacing-figma-5lg: var(--gap-5lg);
+  --spacing-figma-6lg: var(--gap-6lg);
+
+  /* Container max-width tokens */
+  --container-desktop: var(--desktop-width);
+  --container-wide: var(--container-wide);
+  --container-nav: var(--container-nav);
+  --container-pricing: var(--container-pricing);
+  --container-faq: var(--container-faq);
+
+  /* Border radius & shadow tokens */
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+  --radius-media: var(--radius-media);
+  --shadow-card: var(--shadow-card);
+  --shadow-popover: var(--shadow-popover);
+
+  /* Breakpoint ordered above xl (80rem) for exact 1440px Figma canvas */
+  --breakpoint-desktop: 90rem;
+}
+
+/* ============================================================================
+   BASE DOCUMENT & ACCESSIBILITY FOUNDATIONS
+   ============================================================================ */
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size-adjust: from-font;
+  line-height: 1.5;
+  text-align: start;
+}
+
+:where(a:any-link, button, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--brand-red);
+  outline-offset: 3px;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: fixed;
+  inset-block-start: -100%;
+  inset-inline-start: 1rem;
+  z-index: 100;
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-control);
+  background-color: var(--brand-red);
+  color: var(--foreground);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  inset-block-start: 1rem;
+}
+
+/* ============================================================================
+   REUSABLE DESIGN-SYSTEM COMPONENT PRIMITIVES (SECTIONS 3–10 FOUNDATION)
+   ============================================================================ */
+
+@layer components {
+  /* Responsive horizontal gutter & centered alignment rail */
+  .section-shell {
+    margin-inline: auto;
+    inline-size: 100%;
+    padding-inline: var(--gutter-mobile);
+  }
+
+  @media (min-width: 40rem) {
+    .section-shell {
+      padding-inline: var(--gutter-tablet);
+    }
+  }
+
+  @media (min-width: 90rem) {
+    .section-shell {
+      padding-inline: 0;
+    }
+  }
+
+  /* Provisional section title style (Sections 4–9): uppercase display heading */
+  .section-heading {
+    font-family: var(--font-section-display);
+    font-weight: 800;
+    line-height: 1.15;
+    text-transform: uppercase;
+    text-wrap: balance;
+    scroll-margin-top: 6rem;
+    color: var(--foreground);
+  }
+
+  /* Provisional centered subtitle beneath section headings (Pricing / FAQ) */
+  .section-subtitle {
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 0.925rem + 0.25vw, 1.125rem); /* ~18px desktop */
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  /* Provisional editorial body paragraph (XML-measured 34px line pitch at 1440px -> 22px / 1.545) */
+  .section-body {
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 0.85rem + 0.5vw, 1.375rem);
+    font-weight: 400;
+    line-height: 1.545;
+    text-wrap: pretty;
+    color: var(--muted);
+  }
+
+  /* Elevated surface cards (#1f1f1f over #1a1a1a) */
+  .surface-card {
+    background-color: var(--surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .surface-card-bordered {
+    background-color: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .surface-card-featured {
+    background-color: var(--surface);
+    border: 1px solid var(--brand-red);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Horizontal hairline separators */
+  .divider-hairline {
+    block-size: 1px;
+    inline-size: 100%;
+    border: 0;
+    background-color: var(--divider-subtle);
+  }
+
+  .divider-footer {
+    block-size: 1px;
+    inline-size: 100%;
+    border: 0;
+    background-color: var(--divider-footer);
+  }
+
+  /* Provisional ambient red radial glow behind Testimonials & Bottom CTA cutouts */
+  .ambient-red-glow {
+    pointer-events: none;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      var(--brand-glow) 0%,
+      rgba(255, 35, 50, 0) 70%
+    );
+  }
+
+  /* Bottom portrait/cutout fade to page canvas #1a1a1a */
+  .cutout-bottom-fade {
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom var(--in-oklab),
+      rgba(26, 26, 26, 0),
+      var(--background)
+    );
+  }
+}
+
+/* ============================================================================
+   NAVBAR & HERO VERIFIED BASELINE RULES (DO NOT ALTER GEOMETRY OR APPEARANCE)
+   ============================================================================ */
+
+/* Responsive Navigation Bar:
+   - Mobile (<64rem): native popover menu by default (zero JS required)
+   - Desktop (>=64rem): inline Figma bar immediately on SSR paint (no flicker),
+     collapsing back into popover automatically via .is-collapsed if ResizeObserver detects overflow */
+.site-header {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 50;
+  padding-block-start: 1.5rem; /* Figma top: 24px */
+}
+
+.site-header .header-inner {
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  inline-size: 100%;
+  max-inline-size: var(--container-nav); /* Figma 1440 - 180*2 = 1080px */
+  min-block-size: 2.75rem; /* 44px */
+  gap: var(--gap-lg);
+}
+
+.site-header .header-inner > *,
+.site-header .site-menu > li {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.site-header .menu-button {
+  anchor-name: --menu-button;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  min-block-size: 2.75rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--menu-button-border);
+  background-color: var(--menu-button-bg);
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.site-header .site-menu {
+  position: fixed;
+  inset: auto;
+  inset-block-start: 4.75rem;
+  inset-block-start: anchor(--menu-button bottom);
+  inset-inline-end: 1.25rem;
+  inline-size: min(82dvw, 20rem);
+  max-inline-size: calc(100dvw - 2.5rem);
+  block-size: fit-content;
+  max-block-size: calc(100dvh - 6.5rem);
+  margin-block-start: 0.5rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-popover);
+  background-color: var(--surface-popover);
+  color: var(--foreground);
+  box-shadow: var(--shadow-popover);
+  overflow: auto;
+  list-style: none;
+}
+
+.site-header .site-menu:not(:is(:popover-open, .\:popover-open)) {
+  display: none;
+}
+
+.site-header .site-menu:is(:popover-open, .\:popover-open) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.site-header .site-menu::backdrop {
+  background-color: var(--menu-backdrop);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site-header .site-menu[popover] {
+    opacity: 0;
+    translate: 0 -0.375rem;
+    transition: opacity 160ms ease, translate 160ms ease, display 160ms ease, overlay 160ms ease;
+    transition-behavior: allow-discrete;
+  }
+
+  .site-header .site-menu[popover]:is(:popover-open, .\:popover-open) {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @starting-style {
+    .site-header .site-menu[popover]:is(:popover-open, .\:popover-open) {
+      opacity: 0;
+      translate: 0 -0.375rem;
+    }
+  }
+}
+
+@media (min-width: 64rem) {
+  .site-header:not(.is-collapsed) .menu-button {
+    display: none;
+  }
+
+  .site-header:not(.is-collapsed) .site-menu {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.875rem; /* Figma gap: 30px */
+    inline-size: auto;
+    max-inline-size: none;
+    block-size: auto;
+    max-block-size: none;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    opacity: 1;
+    translate: 0 0;
+    transition: none;
+  }
+
+  .site-header:not(.is-collapsed) .site-menu::backdrop {
+    display: none;
+  }
+}
+
+.site-header.is-wide .menu-button {
+  display: none;
+}
+
+.site-header.is-wide .site-menu {
+  position: static;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.875rem; /* Figma gap: 30px */
+  inline-size: auto;
+  max-inline-size: none;
+  block-size: auto;
+  max-block-size: none;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  opacity: 1;
+  translate: 0 0;
+  transition: none;
+}
+
+.site-header.is-wide .site-menu::backdrop {
+  display: none;
+}
+
+.site-header.is-measuring *,
+.site-header.is-measuring {
+  transition: none !important;
+}
+
+/* Figma Hero background 1:34 directional dark fades */
+.hero-photo-vignette {
+  background-image:
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 50.052%, rgb(0, 0, 0) 93.743%),
+    linear-gradient(180deg, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 50.052%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0) 84.388%, rgb(0, 0, 0) 100%);
+}
+
+/* Figma Hero bottom vignette Rectangle 55 (1:54) */
+.hero-bottom-fade {
+  background: linear-gradient(to bottom var(--in-oklab), rgba(26, 26, 26, 0), var(--background));
+}
+
+/* ============================================================================
+   PARTNER LOGOS MARQUEE
+   ============================================================================ */
+
+@keyframes partner-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.partner-marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: partner-marquee 64s linear infinite;
+}
+
+.partner-marquee-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-marquee-track {
+    animation: none;
+    transform: none;
+    width: 100%;
+    max-inline-size: var(--desktop-width);
+    margin-inline: auto;
+    justify-content: center;
+  }
+
+  .partner-marquee-group {
+    flex-shrink: 1;
+    inline-size: 100%;
+    justify-content: center;
+  }
+
+  .partner-marquee-svg {
+    inline-size: 100%;
+    block-size: auto;
+  }
+
+  .partner-marquee-clone {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   WCAG FORCED COLORS MODE SUPPORT
+   ============================================================================ */
+
+@media (forced-colors: active) {
+  .cta-button {
+    border: 2px solid ButtonText;
+    forced-color-adjust: auto;
+  }
+
+  .surface-card,
+  .surface-card-bordered {
+    border: 1px solid CanvasText;
+  }
+
+  .surface-card-featured {
+    border: 2px solid Highlight;
+  }
+
+  .divider-hairline,
+  .divider-footer {
+    border-block-start: 1px solid GrayText;
+    background-color: transparent;
+  }
+
+  .ambient-red-glow {
+    display: none;
+  }
+
+  .site-header a[aria-current="page"] {
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
+  }
+
+  :where(a:any-link, button, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
