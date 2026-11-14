@@ -285,7 +285,7 @@ export default function FitnessCalculator({ className = "" }) {
                     onClick={() => handleInputChange("sex", "male")}
                     className={`py-3 px-4 rounded-control text-sm font-sans font-semibold transition-all border text-center cursor-pointer ${
                       inputs.sex === "male"
-                        ? "border-brand bg-brand/10 text-foreground"
+                        ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                         : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                     }`}
                   >
@@ -298,7 +298,7 @@ export default function FitnessCalculator({ className = "" }) {
                     onClick={() => handleInputChange("sex", "female")}
                     className={`py-3 px-4 rounded-control text-sm font-sans font-semibold transition-all border text-center cursor-pointer ${
                       inputs.sex === "female"
-                        ? "border-brand bg-brand/10 text-foreground"
+                        ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                         : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                     }`}
                   >
@@ -393,7 +393,7 @@ export default function FitnessCalculator({ className = "" }) {
                         onClick={() => handleInputChange("activityId", act.id)}
                         className={`w-full text-left p-3 rounded-control border transition-all flex items-start justify-between gap-3 cursor-pointer ${
                           selected
-                            ? "border-brand bg-brand/10 text-foreground"
+                            ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                             : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                         }`}
                       >
@@ -450,7 +450,7 @@ export default function FitnessCalculator({ className = "" }) {
                         }}
                         className={`p-3 rounded-control border text-left transition-all cursor-pointer ${
                           selected
-                            ? "border-brand bg-brand/10 text-foreground"
+                            ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                             : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                         }`}
                       >
@@ -781,7 +781,7 @@ export default function FitnessCalculator({ className = "" }) {
                       </span>
                     </div>
 
-                    <div className="mt-2.5 inline-block text-xs font-sans font-medium px-2.5 py-0.5 rounded bg-brand/10 text-brand border border-brand/20">
+                    <div className="mt-2.5 inline-block text-xs font-sans font-medium px-2.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--brand-red)_12%,#141414)] text-brand border border-brand/40">
                       {profile.goal.title} ({profile.goalTier.label})
                       {profile.deltaCalories !== 0 && (
                         <span> • {profile.deltaCalories > 0 ? "+" : ""}{profile.deltaCalories} kcal</span>

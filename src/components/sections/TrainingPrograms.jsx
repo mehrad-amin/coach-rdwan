@@ -243,7 +243,7 @@ export default function TrainingPrograms({ className = "" }) {
                     className={[
                       "absolute top-1/2 left-1/2 w-[275px] sm:w-[295px] origin-center",
                       "flex flex-col items-center justify-between text-center",
-                      "transition-all duration-500 ease-out will-change-transform",
+                      "transition-all duration-500 ease-out",
                       isActive
                         ? isFeatured
                           ? "surface-card-featured h-[395px] sm:h-[405px] py-8 shadow-[0_12px_40px_rgba(255,35,50,0.22)]"

@@ -183,9 +183,9 @@ export default function Step4ReviewSubmit({
         </div>
 
         {/* 4. Selected Package */}
-        <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 flex flex-col justify-between">
+        <div className="rounded-xl border border-brand/50 bg-[color-mix(in_srgb,var(--brand-red)_6%,#141414)] p-4 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-brand/20">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-brand/30">
               <h4 className="font-display font-bold text-sm uppercase text-brand tracking-wide">
                 Selected Package
               </h4>

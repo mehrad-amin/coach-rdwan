@@ -83,7 +83,7 @@ export default function Qualifications({ className = "" }) {
                 fill
                 priority={false}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 545px, 545px"
-                className="object-cover transition-transform duration-500 will-change-transform group-hover:scale-[1.02]"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               />
             </div>
           </div>

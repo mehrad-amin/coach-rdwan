@@ -81,7 +81,7 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
                 onClick={() => updateData({ trainingLocation: loc.id })}
                 className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
                   selected
-                    ? "border-brand bg-brand/10 shadow-[0_0_15px_rgba(255,35,50,0.15)] ring-1 ring-brand"
+                    ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_15px_rgba(255,35,50,0.15)]"
                     : "border-white/10 bg-[#141414] hover:border-white/25"
                 }`}
               >
@@ -121,7 +121,7 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
                 onClick={() => updateData({ daysPerWeek: days })}
                 className={`flex flex-col items-center justify-center py-3 rounded-xl border transition-all cursor-pointer ${
                   selected
-                    ? "border-brand bg-brand/15 text-foreground font-bold shadow-[0_0_15px_rgba(255,35,50,0.2)] ring-1 ring-brand"
+                    ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_15%,#191919)] text-foreground font-bold shadow-[0_0_15px_rgba(255,35,50,0.2)]"
                     : "border-white/15 bg-[#141414] text-muted hover:border-white/30 hover:text-foreground"
                 }`}
               >
@@ -159,7 +159,7 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
                 onClick={() => updateData({ package: pkg.id })}
                 className={`relative p-4 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
                   selected
-                    ? "border-brand bg-brand/10 shadow-[0_0_20px_rgba(255,35,50,0.18)] ring-1 ring-brand"
+                    ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_20px_rgba(255,35,50,0.18)]"
                     : "border-white/10 bg-[#141414] hover:border-white/25"
                 }`}
               >

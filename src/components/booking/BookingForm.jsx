@@ -234,7 +234,7 @@ export default function BookingForm() {
     <div className="relative mx-auto w-full max-w-3xl">
       {/* Red Ambient Glow behind Form Card */}
       <div
-        className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 h-[280px] w-[280px] sm:h-[480px] sm:w-[480px] rounded-full bg-[radial-gradient(circle,rgba(255,35,50,0.18)_0%,rgba(255,35,50,0.04)_50%,transparent_70%)] blur-[80px] -z-0"
+        className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 h-[280px] w-[280px] sm:h-[480px] sm:w-[480px] rounded-full bg-[radial-gradient(circle,rgba(255,35,50,0.18)_0%,rgba(255,35,50,0.04)_50%,transparent_70%)] blur-[80px] z-0"
         aria-hidden="true"
       />
 

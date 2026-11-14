@@ -189,7 +189,7 @@ export default function Step2FitnessProfile({ data, updateData, errors }) {
                 onClick={() => updateData({ goal: g.id })}
                 className={`flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all cursor-pointer ${
                   selected
-                    ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_15px_rgba(255,35,50,0.15)] ring-1 ring-brand"
+                    ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_15px_rgba(255,35,50,0.15)]"
                     : "border-white/10 bg-[#141414] hover:border-white/25"
                 }`}
               >
@@ -238,7 +238,7 @@ export default function Step2FitnessProfile({ data, updateData, errors }) {
                 onClick={() => updateData({ experience: exp.id })}
                 className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
                   selected
-                    ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_15px_rgba(255,35,50,0.15)] ring-1 ring-brand"
+                    ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_15px_rgba(255,35,50,0.15)]"
                     : "border-white/10 bg-[#141414] hover:border-white/25"
                 }`}
               >
