@@ -293,7 +293,7 @@ export default function BookingForm() {
 
             {/* Prefilled Calculator Banner Notification */}
             {hasPrefilled && (
-              <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-brand/30 bg-brand/10 p-3 sm:p-3.5 text-xs font-sans text-foreground">
+              <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-brand/30 bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] p-3 sm:p-3.5 text-xs font-sans text-foreground">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand text-foreground">
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" aria-hidden="true">
