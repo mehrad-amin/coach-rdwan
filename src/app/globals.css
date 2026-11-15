@@ -247,9 +247,18 @@ body {
 
   .surface-card-featured {
     background-color: var(--surface);
-    border: 1px solid var(--brand-red);
+    border: 1.5px solid var(--brand-red);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
+  }
+
+  /* Reusable 1.5px brand-red border utility for selected interactive cards and controls.
+     Provides subpixel-safe rasterization resilient to mobile hardware YUV 4:2:0 chroma subsampling
+     while preserving the exact existing design, dimensions, and visual hierarchy. */
+  .border-selected-brand {
+    border-width: 1.5px;
+    border-style: solid;
+    border-color: var(--brand-red);
   }
 
   /* Horizontal hairline separators */

@@ -285,7 +285,7 @@ export default function FitnessCalculator({ className = "" }) {
                     onClick={() => handleInputChange("sex", "male")}
                     className={`py-3 px-4 rounded-control text-sm font-sans font-semibold transition-all border text-center cursor-pointer ${
                       inputs.sex === "male"
-                        ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
+                        ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                         : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                     }`}
                   >
@@ -298,7 +298,7 @@ export default function FitnessCalculator({ className = "" }) {
                     onClick={() => handleInputChange("sex", "female")}
                     className={`py-3 px-4 rounded-control text-sm font-sans font-semibold transition-all border text-center cursor-pointer ${
                       inputs.sex === "female"
-                        ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
+                        ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                         : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                     }`}
                   >
@@ -393,7 +393,7 @@ export default function FitnessCalculator({ className = "" }) {
                         onClick={() => handleInputChange("activityId", act.id)}
                         className={`w-full text-left p-3 rounded-control border transition-all flex items-start justify-between gap-3 cursor-pointer ${
                           selected
-                            ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
+                            ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                             : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                         }`}
                       >
@@ -450,7 +450,7 @@ export default function FitnessCalculator({ className = "" }) {
                         }}
                         className={`p-3 rounded-control border text-left transition-all cursor-pointer ${
                           selected
-                            ? "border-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
+                            ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                             : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                         }`}
                       >
@@ -532,7 +532,7 @@ export default function FitnessCalculator({ className = "" }) {
                           onClick={() => handleAdvancedChange("bmrMethod", "mifflin")}
                           className={`p-2 rounded text-xs font-sans border text-left cursor-pointer ${
                             advancedInputs.bmrMethod === "mifflin"
-                              ? "border-brand bg-brand/10 text-foreground font-semibold"
+                              ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
                           }`}
                         >
@@ -544,7 +544,7 @@ export default function FitnessCalculator({ className = "" }) {
                           onClick={() => handleAdvancedChange("bmrMethod", "katch_mcardle")}
                           className={`p-2 rounded text-xs font-sans border text-left cursor-pointer ${
                             advancedInputs.bmrMethod === "katch_mcardle"
-                              ? "border-brand bg-brand/10 text-foreground font-semibold"
+                              ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
                           }`}
                         >
@@ -556,7 +556,7 @@ export default function FitnessCalculator({ className = "" }) {
                           onClick={() => handleAdvancedChange("bmrMethod", "measured")}
                           className={`p-2 rounded text-xs font-sans border text-left cursor-pointer ${
                             advancedInputs.bmrMethod === "measured"
-                              ? "border-brand bg-brand/10 text-foreground font-semibold"
+                              ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
                           }`}
                         >
