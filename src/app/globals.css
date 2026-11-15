@@ -240,7 +240,7 @@ body {
 
   .surface-card-bordered {
     background-color: var(--surface);
-    border: 1px solid var(--border-subtle);
+    border: 1.5px solid var(--border-subtle);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
   }

@@ -242,7 +242,7 @@ export default function FitnessCalculator({ className = "" }) {
             {/* ==============================================================
                 LEFT COLUMN: ASSESSMENT PARAMETERS (7 cols)
                ============================================================== */}
-            <div className="lg:col-span-7 bg-[#1c1c1c] border border-white/10 rounded-card p-5 sm:p-7 space-y-6">
+            <div className="lg:col-span-7 bg-[#1c1c1c] border-[1.5px] border-white/10 rounded-card p-5 sm:p-7 space-y-6">
               {/* Header inside parameters */}
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
@@ -283,7 +283,7 @@ export default function FitnessCalculator({ className = "" }) {
                     role="radio"
                     aria-checked={inputs.sex === "male"}
                     onClick={() => handleInputChange("sex", "male")}
-                    className={`py-3 px-4 rounded-control text-sm font-sans font-semibold transition-all border text-center cursor-pointer ${
+                    className={`py-3 px-4 rounded-control text-sm font-sans font-semibold transition-all border-[1.5px] text-center cursor-pointer ${
                       inputs.sex === "male"
                         ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                         : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
@@ -296,7 +296,7 @@ export default function FitnessCalculator({ className = "" }) {
                     role="radio"
                     aria-checked={inputs.sex === "female"}
                     onClick={() => handleInputChange("sex", "female")}
-                    className={`py-3 px-4 rounded-control text-sm font-sans font-semibold transition-all border text-center cursor-pointer ${
+                    className={`py-3 px-4 rounded-control text-sm font-sans font-semibold transition-all border-[1.5px] text-center cursor-pointer ${
                       inputs.sex === "female"
                         ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                         : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
@@ -391,7 +391,7 @@ export default function FitnessCalculator({ className = "" }) {
                         role="radio"
                         aria-checked={selected}
                         onClick={() => handleInputChange("activityId", act.id)}
-                        className={`w-full text-left p-3 rounded-control border transition-all flex items-start justify-between gap-3 cursor-pointer ${
+                        className={`w-full text-left p-3 rounded-control border-[1.5px] transition-all flex items-start justify-between gap-3 cursor-pointer ${
                           selected
                             ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                             : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
@@ -448,7 +448,7 @@ export default function FitnessCalculator({ className = "" }) {
                             goalTierId: defaultTier.id,
                           }));
                         }}
-                        className={`p-3 rounded-control border text-left transition-all cursor-pointer ${
+                        className={`p-3 rounded-control border-[1.5px] text-left transition-all cursor-pointer ${
                           selected
                             ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                             : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
@@ -479,7 +479,7 @@ export default function FitnessCalculator({ className = "" }) {
                             key={tier.id}
                             type="button"
                             onClick={() => handleInputChange("goalTierId", tier.id)}
-                            className={`px-2 py-1.5 rounded text-xs font-sans text-center transition-colors cursor-pointer border ${
+                            className={`px-2 py-1.5 rounded text-xs font-sans text-center transition-colors cursor-pointer border-[1.5px] ${
                               isTierActive
                                 ? "border-brand bg-brand text-foreground font-semibold"
                                 : "border-white/10 bg-white/5 text-muted hover:text-foreground"
@@ -530,7 +530,7 @@ export default function FitnessCalculator({ className = "" }) {
                         <button
                           type="button"
                           onClick={() => handleAdvancedChange("bmrMethod", "mifflin")}
-                          className={`p-2 rounded text-xs font-sans border text-left cursor-pointer ${
+                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-left cursor-pointer ${
                             advancedInputs.bmrMethod === "mifflin"
                               ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
@@ -542,7 +542,7 @@ export default function FitnessCalculator({ className = "" }) {
                         <button
                           type="button"
                           onClick={() => handleAdvancedChange("bmrMethod", "katch_mcardle")}
-                          className={`p-2 rounded text-xs font-sans border text-left cursor-pointer ${
+                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-left cursor-pointer ${
                             advancedInputs.bmrMethod === "katch_mcardle"
                               ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
@@ -554,7 +554,7 @@ export default function FitnessCalculator({ className = "" }) {
                         <button
                           type="button"
                           onClick={() => handleAdvancedChange("bmrMethod", "measured")}
-                          className={`p-2 rounded text-xs font-sans border text-left cursor-pointer ${
+                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-left cursor-pointer ${
                             advancedInputs.bmrMethod === "measured"
                               ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
@@ -568,7 +568,7 @@ export default function FitnessCalculator({ className = "" }) {
 
                     {/* Conditional Input based on Method */}
                     {advancedInputs.bmrMethod === "katch_mcardle" && (
-                      <div className="p-3 bg-[#141414] border border-white/10 rounded-control">
+                      <div className="p-3 bg-[#141414] border-[1.5px] border-white/10 rounded-control">
                         <label htmlFor={bodyFatId} className="block text-xs font-medium text-foreground mb-1 font-sans">
                           Body Fat Percentage (%)
                         </label>
@@ -613,7 +613,7 @@ export default function FitnessCalculator({ className = "" }) {
                     )}
 
                     {/* Personal 14–28 Day Tracking Calibration */}
-                    <div className="p-3.5 bg-[#141414] border border-white/10 rounded-control space-y-3">
+                    <div className="p-3.5 bg-[#141414] border-[1.5px] border-white/10 rounded-control space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="font-sans font-semibold text-xs text-foreground block">
@@ -751,7 +751,7 @@ export default function FitnessCalculator({ className = "" }) {
                ============================================================== */}
             <div className="lg:col-span-5 lg:sticky lg:top-24">
               {profile ? (
-                <div className="bg-[#1c1c1c] border border-white/10 rounded-card p-5 sm:p-7 space-y-5">
+                <div className="bg-[#1c1c1c] border-[1.5px] border-white/10 rounded-card p-5 sm:p-7 space-y-5">
                   {/* Results Header */}
                   <div className="flex items-center justify-between border-b border-white/10 pb-4">
                     <div>
@@ -768,7 +768,7 @@ export default function FitnessCalculator({ className = "" }) {
                   </div>
 
                   {/* Primary Target Calorie Block */}
-                  <div className="bg-[#141414] border border-white/10 rounded-control p-4 text-center">
+                  <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-4 text-center">
                     <span className="block text-xs uppercase font-display font-semibold tracking-wider text-muted mb-1">
                       Daily Caloric Target
                     </span>
@@ -781,7 +781,7 @@ export default function FitnessCalculator({ className = "" }) {
                       </span>
                     </div>
 
-                    <div className="mt-2.5 inline-block text-xs font-sans font-medium px-2.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--brand-red)_12%,#141414)] text-brand border border-brand/40">
+                    <div className="mt-2.5 inline-block text-xs font-sans font-medium px-2.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--brand-red)_12%,#141414)] text-brand border-[1.5px] border-brand/40">
                       {profile.goal.title} ({profile.goalTier.label})
                       {profile.deltaCalories !== 0 && (
                         <span> • {profile.deltaCalories > 0 ? "+" : ""}{profile.deltaCalories} kcal</span>
@@ -795,7 +795,7 @@ export default function FitnessCalculator({ className = "" }) {
 
                   {/* Secondary Metrics Row: BMR, TDEE, BMI */}
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-[#141414] border border-white/10 rounded-control p-2.5">
+                    <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5">
                       <span className="block text-[11px] font-display uppercase tracking-wider text-muted">
                         BMR
                       </span>
@@ -805,7 +805,7 @@ export default function FitnessCalculator({ className = "" }) {
                       <span className="text-[10px] text-muted font-sans block">kcal at rest</span>
                     </div>
 
-                    <div className="bg-[#141414] border border-white/10 rounded-control p-2.5">
+                    <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5">
                       <span className="block text-[11px] font-display uppercase tracking-wider text-muted">
                         TDEE
                       </span>
@@ -815,7 +815,7 @@ export default function FitnessCalculator({ className = "" }) {
                       <span className="text-[10px] text-muted font-sans block">maintenance</span>
                     </div>
 
-                    <div className="bg-[#141414] border border-white/10 rounded-control p-2.5">
+                    <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5">
                       <span className="block text-[11px] font-display uppercase tracking-wider text-muted">
                         BMI
                       </span>
@@ -864,7 +864,7 @@ export default function FitnessCalculator({ className = "" }) {
 
                     {/* Macro Breakdown 3-Card Grid */}
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-[#141414] border border-white/10 rounded-control p-2.5 text-center">
+                      <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5 text-center">
                         <div className="flex items-center justify-center gap-1 text-[11px] font-medium text-foreground">
                           <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                           <span>Protein</span>
@@ -877,7 +877,7 @@ export default function FitnessCalculator({ className = "" }) {
                         </span>
                       </div>
 
-                      <div className="bg-[#141414] border border-white/10 rounded-control p-2.5 text-center">
+                      <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5 text-center">
                         <div className="flex items-center justify-center gap-1 text-[11px] font-medium text-foreground">
                           <span className="w-1.5 h-1.5 rounded-full bg-white" />
                           <span>Carbs</span>
@@ -890,7 +890,7 @@ export default function FitnessCalculator({ className = "" }) {
                         </span>
                       </div>
 
-                      <div className="bg-[#141414] border border-white/10 rounded-control p-2.5 text-center">
+                      <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5 text-center">
                         <div className="flex items-center justify-center gap-1 text-[11px] font-medium text-foreground">
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                           <span>Fat</span>

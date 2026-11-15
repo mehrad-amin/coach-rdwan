@@ -187,7 +187,7 @@ export default function Step2FitnessProfile({ data, updateData, errors }) {
                 role="radio"
                 aria-checked={selected}
                 onClick={() => updateData({ goal: g.id })}
-                className={`flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`flex items-start gap-3.5 p-4 rounded-xl border-[1.5px] text-left transition-all cursor-pointer ${
                   selected
                     ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_15px_rgba(255,35,50,0.15)]"
                     : "border-white/10 bg-[#141414] hover:border-white/25"
@@ -236,7 +236,7 @@ export default function Step2FitnessProfile({ data, updateData, errors }) {
                 role="radio"
                 aria-checked={selected}
                 onClick={() => updateData({ experience: exp.id })}
-                className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`p-4 rounded-xl border-[1.5px] text-left transition-all cursor-pointer ${
                   selected
                     ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_15px_rgba(255,35,50,0.15)]"
                     : "border-white/10 bg-[#141414] hover:border-white/25"
@@ -247,7 +247,7 @@ export default function Step2FitnessProfile({ data, updateData, errors }) {
                     {exp.title}
                   </span>
                   <div>
-                    <span className="inline-block whitespace-nowrap text-[11px] font-sans font-medium text-brand bg-brand/10 px-2.5 py-0.5 rounded-full border border-brand/20">
+                    <span className="inline-block whitespace-nowrap text-[11px] font-sans font-medium text-brand bg-brand/10 px-2.5 py-0.5 rounded-full border-[1.5px] border-brand/20">
                       {exp.subtitle}
                     </span>
                   </div>

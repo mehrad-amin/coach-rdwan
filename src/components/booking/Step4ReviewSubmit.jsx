@@ -59,7 +59,7 @@ export default function Step4ReviewSubmit({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* 1. Personal Information */}
-        <div className="rounded-xl border border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
+        <div className="rounded-xl border-[1.5px] border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
               <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
@@ -97,7 +97,7 @@ export default function Step4ReviewSubmit({
         </div>
 
         {/* 2. Fitness Profile */}
-        <div className="rounded-xl border border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
+        <div className="rounded-xl border-[1.5px] border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
               <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
@@ -143,7 +143,7 @@ export default function Step4ReviewSubmit({
         </div>
 
         {/* 3. Training & Logistics */}
-        <div className="rounded-xl border border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
+        <div className="rounded-xl border-[1.5px] border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
               <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
@@ -215,7 +215,7 @@ export default function Step4ReviewSubmit({
       </div>
 
       {/* Required Consent Checkbox */}
-      <div className="rounded-xl bg-[#141414] border border-white/10 p-4">
+      <div className="rounded-xl bg-[#141414] border-[1.5px] border-white/10 p-4">
         <label className="flex items-start gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -239,7 +239,7 @@ export default function Step4ReviewSubmit({
       </div>
 
       {/* Honest Demo Disclaimer */}
-      <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center">
+      <div className="rounded-xl border-[1.5px] border-white/10 bg-white/[0.02] p-3 text-center">
         <p className="inline-flex items-center justify-center gap-1.5 text-xs text-muted font-sans">
           <svg
             className="w-3.5 h-3.5 shrink-0 text-brand inline-block"

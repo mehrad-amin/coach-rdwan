@@ -160,7 +160,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
                   role="radio"
                   aria-checked={selected}
                   onClick={() => updateData({ gender: g.value })}
-                  className={`flex items-center justify-center py-3 px-4 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
+                  className={`flex items-center justify-center py-3 px-4 rounded-xl border-[1.5px] text-sm font-medium transition-all cursor-pointer ${
                     selected
                       ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] text-foreground font-semibold shadow-[0_0_15px_rgba(255,35,50,0.15)]"
                       : "border-white/15 bg-[#141414] text-muted hover:border-white/30 hover:text-foreground"
