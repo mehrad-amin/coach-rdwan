@@ -44,7 +44,9 @@ export const viewport = {
   colorScheme: "dark",
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://coach-rdwan.coach-rise.workers.dev";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -80,11 +82,20 @@ export async function generateMetadata() {
       title: dict.metadata.titleDefault,
       description: dict.metadata.description,
       siteName: dict.metadata.siteName,
+      images: [
+        {
+          url: `${siteUrl}/images/rdwan/rdwan-squat.jpg`,
+          width: 1200,
+          height: 630,
+          alt: "Rdwan fitness coach",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: dict.metadata.titleDefault,
       description: dict.metadata.description,
+      images: [`${siteUrl}/images/rdwan/rdwan-squat.jpg`],
     },
     robots: {
       index: true,
