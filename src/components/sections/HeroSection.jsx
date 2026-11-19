@@ -1,9 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import CtaButton from "@/components/ui/CtaButton";
 import DiagonalBeams from "@/components/ui/DiagonalBeams";
-import { HERO_CONTENT } from "@/data/hero";
+import { HERO_MEDIA } from "@/data/hero";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 export default function HeroSection() {
+  const { t } = useLocale();
+
   return (
     <section
       id="home"
@@ -15,10 +20,10 @@ export default function HeroSection() {
         {/* Layer 1: Background gym interior (1:34) */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 opacity-10 mix-blend-luminosity desktop:inset-auto desktop:left-[2px] desktop:top-[22px] desktop:h-[959px] desktop:w-[1438px]"
+          className="pointer-events-none absolute inset-0 z-0 opacity-10 mix-blend-luminosity desktop:inset-auto desktop:start-[2px] desktop:top-[22px] desktop:h-[959px] desktop:w-[1438px]"
         >
           <Image
-            src={HERO_CONTENT.backgroundImage.src}
+            src={HERO_MEDIA.backgroundImage.src}
             alt=""
             fill
             loading="eager"
@@ -28,52 +33,57 @@ export default function HeroSection() {
           <div className="hero-photo-vignette absolute inset-0" />
         </div>
 
-        {/* Layer 2: Diagonal translucent white and red light beams (1:40 / Group 36) */}
+        {/* Layer 2: Diagonal translucent white and red light beams (mirrored symmetrically in RTL) */}
         <DiagonalBeams />
 
-        {/* Layer 6 in z-order (first in DOM flow so mobile reads headline & CTA before cutout) */}
-        <div className="relative z-20 px-5 pt-28 sm:px-8 sm:pt-32 lg:px-0 lg:pb-[110px] lg:pt-[150px] xl:pb-[120px] xl:pt-[170px] desktop:pb-[156px] desktop:pt-[230px]">
-          <div className="lg:pl-[11.528%] desktop:pl-[166px]">
+        {/* Layer 6 in z-order (first in DOM flow so mobile reads headline & CTA before portrait) */}
+        <div className="relative z-20 px-5 pt-28 sm:px-8 sm:pt-32 lg:px-0 lg:pb-[110px] lg:pt-[150px] xl:pb-[120px] xl:pt-[170px] desktop:pb-[156px] desktop:pt-[220px]">
+          <div className="lg:ps-[6%] xl:ps-[9%] desktop:ps-[166px]">
             <h1
               id="hero-heading"
               tabIndex={-1}
-              className="max-w-[686px] scroll-mt-24 font-display text-[clamp(2.125rem,1rem+4.44vw,5rem)] font-extrabold uppercase leading-[1.2] tracking-[0.02em] text-foreground lg:max-w-[47.64vw] desktop:max-w-[686px]"
+              className="max-w-[560px] scroll-mt-24 font-display text-[clamp(2.125rem,1rem+4.2vw,4.75rem)] font-extrabold uppercase leading-[1.18] tracking-[0.02em] text-foreground lg:max-w-[490px] xl:max-w-[570px] desktop:max-w-[640px] rtl:leading-[1.24]"
             >
-              {HERO_CONTENT.headline}
+              {t.hero.headline}
             </h1>
 
-            <p className="mt-3 max-w-[480px] text-pretty font-sans text-[clamp(1.0625rem,0.775rem+0.667vw,1.375rem)] font-normal leading-[1.545] text-foreground/55 lg:ml-[4px] lg:mt-[10px]">
-              {HERO_CONTENT.lead}
+            <p className="mt-4 max-w-[490px] text-pretty font-sans text-[clamp(1rem,0.85rem+0.55vw,1.3125rem)] font-normal leading-[1.58] text-foreground/60 lg:mt-4 rtl:leading-[1.75]">
+              {t.hero.lead}
             </p>
 
-            <div className="mt-8 lg:mt-[44px] desktop:mt-[68px]">
-              <CtaButton href={HERO_CONTENT.ctaHref} size="large">
-                {HERO_CONTENT.ctaLabel}
+            <div className="mt-8 lg:mt-[44px] desktop:mt-[64px]">
+              <CtaButton href={HERO_MEDIA.ctaHref} size="large">
+                {t.hero.ctaLabel}
               </CtaButton>
             </div>
           </div>
         </div>
 
-        {/* Layer 3: Giant John DOE watermark (1:51) */}
+        {/* Layer 3: Giant brand watermark */}
         <p
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-12 left-4 z-[5] select-none whitespace-nowrap bg-gradient-to-t from-white from-[25.833%] to-transparent to-[81.439%] bg-clip-text font-display text-[clamp(4.5rem,15.27vw,13.75rem)] font-extrabold uppercase leading-[1.2] tracking-[-0.01em] text-transparent opacity-30 lg:bottom-auto lg:left-[2px] lg:top-[580px] xl:top-[640px] desktop:top-[750px] desktop:tracking-[-2.2px]"
+          className="pointer-events-none absolute inset-x-0 bottom-[34px] z-[5] select-none whitespace-nowrap bg-gradient-to-t from-white from-[25.833%] to-transparent to-[81.439%] bg-clip-text text-center font-display text-[clamp(4.75rem,21vw,7.25rem)] font-extrabold uppercase leading-[1.2] tracking-[-0.01em] text-transparent opacity-30 sm:bottom-[54px] rtl:text-[clamp(6rem,28.5vw,8.5rem)] rtl:opacity-[0.45] lg:inset-x-auto lg:bottom-auto lg:start-[2px] lg:top-[580px] lg:text-start lg:text-[clamp(4.5rem,15.27vw,13.75rem)] lg:rtl:text-[clamp(4.5rem,15.27vw,13.75rem)] lg:rtl:opacity-30 xl:top-[640px] desktop:top-[740px] desktop:tracking-[-2.2px] rtl:tracking-normal"
         >
-          {HERO_CONTENT.watermarkText}
+          {t.hero.watermarkText}
         </p>
 
-        {/* Layer 4: Trainer portrait cutout (1:53) mirrored horizontally to face headline */}
-        <div className="pointer-events-none relative z-10 mx-auto mt-6 w-[78%] max-w-[360px] select-none sm:max-w-[400px] lg:absolute lg:bottom-0 lg:left-[52.014%] lg:right-auto lg:mt-0 lg:w-[37.153%] lg:max-w-none">
-          <div className="relative aspect-[535/883] w-full overflow-hidden -scale-x-100">
+        {/* Layer 4: Rdwan transparent portrait cutout (natural 1800x2400 aspect, unmirrored) */}
+        <div className="pointer-events-none relative z-10 mx-auto -mt-8 w-[92%] max-w-[420px] select-none sm:-mt-10 sm:max-w-[480px] lg:absolute lg:bottom-0 lg:mt-0 lg:w-[540px] lg:max-w-none xl:w-[650px] desktop:w-[780px] ltr:lg:end-[-20px] rtl:lg:end-[-48px] ltr:xl:end-[0px] rtl:xl:end-[-34px] ltr:desktop:end-[36px] rtl:desktop:end-[-6px]">
+          {/* Subtle ambient red rim glow behind Rdwan matching design tokens */}
+          <div
+            aria-hidden="true"
+            className="ambient-red-glow absolute left-1/2 top-[58%] h-[58%] w-[58%] -translate-x-1/2 -translate-y-1/2 blur-[65px]"
+          />
+          <div className="relative aspect-[3/4] w-full">
             <Image
-              src={HERO_CONTENT.trainerCutout.src}
-              alt={HERO_CONTENT.trainerCutout.alt}
-              width={HERO_CONTENT.trainerCutout.width}
-              height={HERO_CONTENT.trainerCutout.height}
+              src={HERO_MEDIA.coachCutout.src}
+              alt={t.hero.portraitAlt}
+              width={HERO_MEDIA.coachCutout.width}
+              height={HERO_MEDIA.coachCutout.height}
               preload
               fetchPriority="high"
-              sizes="(min-width: 1024px) 128vw, 270vw"
-              className="absolute left-[-122.42%] top-0 h-[138.97%] w-[344.84%] max-w-none"
+              sizes="(min-width: 1440px) 780px, (min-width: 1280px) 650px, (min-width: 1024px) 540px, 92vw"
+              className="relative z-10 h-full w-full object-contain object-bottom drop-shadow-[0_18px_40px_rgba(0,0,0,0.6)]"
             />
           </div>
         </div>

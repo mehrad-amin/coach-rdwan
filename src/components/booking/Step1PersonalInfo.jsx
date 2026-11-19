@@ -1,20 +1,25 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
+
 export default function Step1PersonalInfo({ data, updateData, errors }) {
+  const { t } = useLocale();
+  const step1 = t?.booking?.step1 || {};
+
   const genders = [
-    { value: "Male", label: "Male" },
-    { value: "Female", label: "Female" },
-    { value: "Other", label: "Other / Prefer not to say" },
+    { value: "Male", label: step1.genders?.male || "Male" },
+    { value: "Female", label: step1.genders?.female || "Female" },
+    { value: "Other", label: step1.genders?.other || "Other / Prefer not to say" },
   ];
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight text-foreground">
-          Step 1: Personal Information
+          {step1.title || "Step 1: Personal Information"}
         </h3>
         <p className="mt-1 text-sm text-muted font-sans">
-          Tell us a little bit about yourself so Coach John can contact you.
+          {step1.subtitle || "Tell us a little bit about yourself so Coach Rdwan can contact you."}
         </p>
       </div>
 
@@ -25,7 +30,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             htmlFor="fullName"
             className="block text-sm font-medium text-foreground/90 mb-1.5"
           >
-            Full Name <span className="text-brand">*</span>
+            {step1.fullNameLabel || "Full Name"} <span className="text-brand">*</span>
           </label>
           <input
             type="text"
@@ -33,7 +38,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             name="fullName"
             value={data.fullName || ""}
             onChange={(e) => updateData({ fullName: e.target.value })}
-            placeholder="e.g. Alex Morgan"
+            placeholder={step1.fullNamePlaceholder || "e.g. Alex Morgan"}
             aria-invalid={Boolean(errors.fullName)}
             aria-describedby={errors.fullName ? "fullName-error" : undefined}
             className={`w-full rounded-xl bg-[#141414] px-4 py-3 text-foreground placeholder-white/30 border transition-colors outline-none focus:ring-1 ${
@@ -55,7 +60,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             htmlFor="email"
             className="block text-sm font-medium text-foreground/90 mb-1.5"
           >
-            Email Address <span className="text-brand">*</span>
+            {step1.emailLabel || "Email Address"} <span className="text-brand">*</span>
           </label>
           <input
             type="email"
@@ -63,7 +68,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             name="email"
             value={data.email || ""}
             onChange={(e) => updateData({ email: e.target.value })}
-            placeholder="you@example.com"
+            placeholder={step1.emailPlaceholder || "you@example.com"}
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? "email-error" : undefined}
             className={`w-full rounded-xl bg-[#141414] px-4 py-3 text-foreground placeholder-white/30 border transition-colors outline-none focus:ring-1 ${
@@ -85,7 +90,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             htmlFor="phone"
             className="block text-sm font-medium text-foreground/90 mb-1.5"
           >
-            WhatsApp / Phone <span className="text-brand">*</span>
+            {step1.phoneLabel || "WhatsApp / Phone"} <span className="text-brand">*</span>
           </label>
           <input
             type="tel"
@@ -93,7 +98,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             name="phone"
             value={data.phone || ""}
             onChange={(e) => updateData({ phone: e.target.value })}
-            placeholder="+1 (555) 000-0000"
+            placeholder={step1.phonePlaceholder || "+966 50 000 0000"}
             aria-invalid={Boolean(errors.phone)}
             aria-describedby={errors.phone ? "phone-error" : undefined}
             className={`w-full rounded-xl bg-[#141414] px-4 py-3 text-foreground placeholder-white/30 border transition-colors outline-none focus:ring-1 ${
@@ -115,7 +120,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             htmlFor="age"
             className="block text-sm font-medium text-foreground/90 mb-1.5"
           >
-            Age (Years) <span className="text-brand">*</span>
+            {step1.ageLabel || "Age (Years)"} <span className="text-brand">*</span>
           </label>
           <input
             type="number"
@@ -125,7 +130,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             max="85"
             value={data.age || ""}
             onChange={(e) => updateData({ age: e.target.value })}
-            placeholder="e.g. 28"
+            placeholder={step1.agePlaceholder || "e.g. 28"}
             aria-invalid={Boolean(errors.age)}
             aria-describedby={errors.age ? "age-error" : undefined}
             className={`w-full rounded-xl bg-[#141414] px-4 py-3 text-foreground placeholder-white/30 border transition-colors outline-none focus:ring-1 ${
@@ -144,11 +149,11 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
         {/* Gender Selection */}
         <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-foreground/90 mb-2">
-            Gender <span className="text-brand">*</span>
+            {step1.genderLabel || "Gender"} <span className="text-brand">*</span>
           </label>
           <div
             role="radiogroup"
-            aria-label="Gender selection"
+            aria-label={step1.genderLabel || "Gender selection"}
             className="grid grid-cols-1 sm:grid-cols-3 gap-3"
           >
             {genders.map((g) => {

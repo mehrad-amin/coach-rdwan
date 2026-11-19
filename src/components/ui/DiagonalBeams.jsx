@@ -68,21 +68,23 @@ export default function DiagonalBeams() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute top-0 right-[-190px] z-[2] h-[962px] w-[1440px] origin-top-right scale-[0.95] select-none sm:right-[-90px] sm:scale-[0.95] lg:right-0 lg:scale-[0.86] xl:scale-[0.9] desktop:left-0 desktop:right-auto desktop:scale-100"
+      className="pointer-events-none absolute inset-0 z-[2] overflow-hidden select-none rtl:-scale-x-100"
     >
-      {BEAMS.map((beam) => (
-        <div
-          key={beam.id}
-          className={`absolute flex items-center justify-center ${beam.wrapperClass}`}
-        >
-          <div className="-rotate-30 flex-none">
-            <div
-              className={`relative ${beam.barClass}`}
-              style={{ backgroundImage: beam.backgroundImage }}
-            />
+      <div className="absolute top-0 right-[-190px] h-[962px] w-[1440px] origin-top-right scale-[0.95] sm:right-[-90px] sm:scale-[0.95] lg:right-0 lg:scale-[0.86] xl:scale-[0.9] desktop:left-0 desktop:right-auto desktop:scale-100">
+        {BEAMS.map((beam) => (
+          <div
+            key={beam.id}
+            className={`absolute flex items-center justify-center ${beam.wrapperClass}`}
+          >
+            <div className="-rotate-30 flex-none">
+              <div
+                className={`relative ${beam.barClass}`}
+                style={{ backgroundImage: beam.backgroundImage }}
+              />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

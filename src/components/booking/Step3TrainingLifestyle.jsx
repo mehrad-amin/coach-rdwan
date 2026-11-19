@@ -1,73 +1,76 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
+import { PRICING_CONFIG } from "@/data/pricing";
+
 export default function Step3TrainingLifestyle({ data, updateData, errors }) {
+  const { t, locale } = useLocale();
+  const step3 = t?.booking?.step3 || {};
+
   const locations = [
     {
       id: "gym",
-      title: "Gym Facility",
-      desc: "Commercial or private fitness club with full equipment & free weights",
+      title: step3.locations?.gym?.title || "Gym Facility",
+      desc: step3.locations?.gym?.desc || "Commercial or private fitness club with full equipment & free weights",
     },
     {
       id: "home",
-      title: "Home Gym",
-      desc: "Workout from home with dumbbells, resistance bands, or bodyweight",
+      title: step3.locations?.home?.title || "Home Gym",
+      desc: step3.locations?.home?.desc || "Workout from home with dumbbells, resistance bands, or bodyweight",
     },
     {
       id: "both",
-      title: "Both / Hybrid",
-      desc: "Flexible split combining gym sessions with home functional workouts",
+      title: step3.locations?.both?.title || "Both / Hybrid",
+      desc: step3.locations?.both?.desc || "Flexible split combining gym sessions with home functional workouts",
     },
   ];
 
   const daysOptions = [2, 3, 4, 5, 6];
 
-  const packages = [
-    {
-      id: "personal_training",
-      title: "Personal Training",
-      price: "$200",
-      period: "/month",
-      badge: "In-Person / Virtual",
-      desc: "Custom weekly workout programming, form analysis, and 1-on-1 coaching sessions.",
-    },
-    {
-      id: "nutrition",
-      title: "Diet & Nutrition",
-      price: "$150",
-      period: "/month",
-      badge: "Targeted Nutrition",
-      desc: "Caloric & macro targets, personalized meal structure, and weekly dietary adjustments.",
-    },
-    {
-      id: "hybrid",
-      title: "Training + Diet",
-      price: "$300",
-      period: "/month",
-      badge: "Most Popular",
-      recommended: true,
-      desc: "The complete transformation blueprint: full workout coaching + precision nutrition planning.",
-    },
-  ];
+  const currency = t?.pricing?.currency || "SAR";
+  const period = t?.pricing?.period || "/month";
+
+  const packages = PRICING_CONFIG.plans.map((plan) => {
+    const planInfo = t?.pricing?.plans?.[plan.id] || {};
+    const badgeText =
+      plan.badge?.[locale] ||
+      (plan.featured
+        ? locale === "ar"
+          ? "الأكثر طلبًا"
+          : "Most Popular"
+        : null);
+
+    return {
+      id: plan.id,
+      title: planInfo.name || plan.id,
+      price: `${plan.priceAmount} ${currency}`,
+      period: period,
+      badge: badgeText,
+      featured: Boolean(plan.featured),
+      desc: planInfo.description || "",
+      features: planInfo.features || [],
+    };
+  });
 
   return (
     <div className="space-y-7">
       <div>
         <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight text-foreground">
-          Step 3: Training & Lifestyle
+          {step3.title || "Step 3: Training & Lifestyle"}
         </h3>
         <p className="mt-1 text-sm text-muted font-sans">
-          Select your training logistics and chosen coaching package so we can design your schedule.
+          {step3.subtitle || "Select your training logistics and chosen coaching package so we can design your schedule."}
         </p>
       </div>
 
       {/* Preferred Training Location */}
       <div>
         <label className="block text-sm font-medium text-foreground/90 mb-2.5">
-          Preferred Training Location <span className="text-brand">*</span>
+          {step3.locationLabel || "Preferred Training Location"} <span className="text-brand">*</span>
         </label>
         <div
           role="radiogroup"
-          aria-label="Preferred training location"
+          aria-label={step3.locationLabel || "Preferred training location"}
           className="grid grid-cols-1 sm:grid-cols-3 gap-3"
         >
           {locations.map((loc) => {
@@ -79,7 +82,7 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
                 role="radio"
                 aria-checked={selected}
                 onClick={() => updateData({ trainingLocation: loc.id })}
-                className={`p-4 rounded-xl border-[1.5px] text-left transition-all cursor-pointer ${
+                className={`p-4 rounded-xl border-[1.5px] text-start transition-all cursor-pointer ${
                   selected
                     ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_15px_rgba(255,35,50,0.15)]"
                     : "border-white/10 bg-[#141414] hover:border-white/25"
@@ -103,11 +106,11 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
       {/* Available Days per Week */}
       <div>
         <label className="block text-sm font-medium text-foreground/90 mb-2.5">
-          Available Training Days Per Week <span className="text-brand">*</span>
+          {step3.daysLabel || "Available Training Days Per Week"} <span className="text-brand">*</span>
         </label>
         <div
           role="radiogroup"
-          aria-label="Available training days per week"
+          aria-label={step3.daysLabel || "Available training days per week"}
           className="grid grid-cols-5 gap-2.5 max-w-md"
         >
           {daysOptions.map((days) => {
@@ -127,7 +130,7 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
               >
                 <span className="font-display text-xl">{days}</span>
                 <span className="text-[10px] uppercase font-sans tracking-wide text-muted">
-                  Days
+                  {step3.daysUnit || "Days"}
                 </span>
               </button>
             );
@@ -141,11 +144,11 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
       {/* Preferred Coaching Package */}
       <div>
         <label className="block text-sm font-medium text-foreground/90 mb-2.5">
-          Preferred Coaching Package <span className="text-brand">*</span>
+          {step3.packageLabel || "Preferred Coaching Package"} <span className="text-brand">*</span>
         </label>
         <div
           role="radiogroup"
-          aria-label="Preferred coaching package"
+          aria-label={step3.packageLabel || "Preferred coaching package"}
           className="grid grid-cols-1 sm:grid-cols-3 gap-3.5"
         >
           {packages.map((pkg) => {
@@ -157,7 +160,7 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
                 role="radio"
                 aria-checked={selected}
                 onClick={() => updateData({ package: pkg.id })}
-                className={`relative p-4 rounded-xl border-[1.5px] text-left flex flex-col justify-between transition-all cursor-pointer ${
+                className={`relative p-4 rounded-xl border-[1.5px] text-start flex flex-col justify-between transition-all cursor-pointer ${
                   selected
                     ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] shadow-[0_0_20px_rgba(255,35,50,0.18)]"
                     : "border-white/10 bg-[#141414] hover:border-white/25"
@@ -168,23 +171,25 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
                     <span className="font-display font-bold text-base text-foreground">
                       {pkg.title}
                     </span>
-                    <div>
-                      <span
-                        className={`inline-block whitespace-nowrap text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
-                          pkg.recommended
-                            ? "bg-brand text-foreground"
-                            : "bg-white/10 text-muted"
-                        }`}
-                      >
-                        {pkg.badge}
-                      </span>
-                    </div>
+                    {pkg.badge && (
+                      <div>
+                        <span
+                          className={`inline-block whitespace-nowrap text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
+                            pkg.featured
+                              ? "bg-brand text-foreground"
+                              : "bg-white/10 text-muted"
+                          }`}
+                        >
+                          {pkg.badge}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-baseline gap-1 my-2">
                     <span className="font-display font-extrabold text-2xl text-foreground">
                       {pkg.price}
                     </span>
-                    <span className="font-sans text-xs text-muted">{pkg.period}</span>
+                    <span className="font-sans text-xs text-muted ms-1">{pkg.period}</span>
                   </div>
                   <p className="text-xs text-muted leading-relaxed font-sans mt-2">
                     {pkg.desc}
@@ -197,13 +202,26 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
         {errors.package && (
           <p className="mt-1.5 text-xs text-red-400 font-medium">{errors.package}</p>
         )}
+
+        {/* Student Discount Notice */}
+        <div className="mt-3.5 flex items-start sm:items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-muted font-sans">
+          <span className="shrink-0 font-bold uppercase tracking-wider text-brand">
+            {t?.pricing?.studentDiscount || "25% Student Discount"}:
+          </span>
+          <span className="leading-relaxed">
+            {step3.studentDiscountNote ||
+              "25% student discount available on all plans upon student ID verification."}
+          </span>
+        </div>
       </div>
 
       {/* Injuries / Physical Limitations / Notes (Optional) */}
       <div>
         <label htmlFor="notes" className="block text-sm font-medium text-foreground/90 mb-1.5">
-          Injuries, Physical Limitations or Coach Notes{" "}
-          <span className="text-xs text-muted font-normal">(Optional)</span>
+          {step3.notesLabel || "Injuries, Physical Limitations or Coach Notes"}{" "}
+          <span className="text-xs text-muted font-normal">
+            {step3.notesOptional || "(Optional)"}
+          </span>
         </label>
         <textarea
           id="notes"
@@ -211,7 +229,7 @@ export default function Step3TrainingLifestyle({ data, updateData, errors }) {
           rows={3}
           value={data.notes || ""}
           onChange={(e) => updateData({ notes: e.target.value })}
-          placeholder="E.g. Past shoulder dislocation, lower back stiffness, asthma, dietary allergies..."
+          placeholder={step3.notesPlaceholder || "E.g. Past shoulder dislocation, lower back stiffness, asthma, dietary allergies..."}
           className="w-full rounded-xl bg-[#141414] px-4 py-3 text-foreground placeholder-white/30 border border-white/15 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors font-sans text-sm resize-y"
         />
       </div>

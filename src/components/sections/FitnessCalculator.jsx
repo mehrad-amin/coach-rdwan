@@ -7,11 +7,18 @@ import {
   FITNESS_GOALS,
   calculateFitnessProfile,
 } from "@/lib/fitness-calculations";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 const STORAGE_KEY = "pt_fitness_calculator_v1";
 
+function formatSigned(value) {
+  return `${value > 0 ? "+" : ""}${value}`;
+}
+
 export default function FitnessCalculator({ className = "" }) {
   const router = useRouter();
+  const { t } = useLocale();
+  const calc = t.calculator;
 
   // Core Physical Inputs
   const [inputs, setInputs] = useState({
@@ -51,32 +58,28 @@ export default function FitnessCalculator({ className = "" }) {
   const startWeightId = useId();
   const endWeightId = useId();
 
-  // Validation
+  // Validation (identical numeric rules; returns stable error keys for live bilingual switching)
   const validateField = (name, value) => {
     let err = "";
     if (name === "age") {
       const num = parseInt(value, 10);
-      if (!value) err = "Age is required.";
-      else if (isNaN(num) || num < 18) err = "Calculator is calibrated for adults aged 18+.";
-      else if (num > 99) err = "Please enter an age between 18 and 99.";
+      if (!value) err = "age_required";
+      else if (isNaN(num) || num < 18) err = "age_under_18";
+      else if (num > 99) err = "age_over_99";
     } else if (name === "height") {
       const num = parseFloat(value);
-      if (!value) err = "Height is required.";
-      else if (isNaN(num) || num < 120 || num > 230)
-        err = "Height must be between 120 and 230 cm.";
+      if (!value) err = "height_required";
+      else if (isNaN(num) || num < 120 || num > 230) err = "height_range";
     } else if (name === "weight") {
       const num = parseFloat(value);
-      if (!value) err = "Weight is required.";
-      else if (isNaN(num) || num < 35 || num > 250)
-        err = "Weight must be between 35 and 250 kg.";
+      if (!value) err = "weight_required";
+      else if (isNaN(num) || num < 35 || num > 250) err = "weight_range";
     } else if (name === "bodyFatPct" && value !== "") {
       const num = parseFloat(value);
-      if (isNaN(num) || num < 4 || num > 55)
-        err = "Body fat percentage must be between 4% and 55%.";
+      if (isNaN(num) || num < 4 || num > 55) err = "body_fat_range";
     } else if (name === "measuredRmr" && value !== "") {
       const num = parseFloat(value);
-      if (isNaN(num) || num < 800 || num > 3500)
-        err = "Measured RMR must be between 800 and 3,500 kcal/day.";
+      if (isNaN(num) || num < 800 || num > 3500) err = "measured_rmr_range";
     }
     return err;
   };
@@ -148,7 +151,7 @@ export default function FitnessCalculator({ className = "" }) {
     setErrors({});
   };
 
-  // Calculate live fitness profile
+  // Calculate live fitness profile (engine untouched)
   const profile = calculateFitnessProfile({
     sex: inputs.sex,
     age: inputs.age,
@@ -204,7 +207,37 @@ export default function FitnessCalculator({ className = "" }) {
     router.push("/booking");
   };
 
-  const selectedGoalObj = FITNESS_GOALS.find((g) => g.id === inputs.goalId) || FITNESS_GOALS[1];
+  const selectedGoalObj =
+    FITNESS_GOALS.find((g) => g.id === inputs.goalId) || FITNESS_GOALS[1];
+
+  // Localized presentation helpers derived from engine keys
+  const getLocalizedSourceTag = () => {
+    if (!profile) return "";
+    if (profile.isCalibratedActive && profile.calibrationResult) {
+      return calc.sourceTags.calibrated(profile.calibrationResult.trackingDays);
+    }
+    return calc.sourceTags[profile.bmrMethod] || profile.sourceTag;
+  };
+
+  const getLocalizedCalibrationMessage = (calibrationResult) => {
+    if (!calibrationResult) return "";
+    if (calibrationResult.status === "INSUFFICIENT_DAYS") {
+      const days = parseInt(advancedInputs.trackingDays, 10);
+      return calc.calibrationMessages.INSUFFICIENT_DAYS(days);
+    }
+    return (
+      calc.calibrationMessages[calibrationResult.status] ||
+      calibrationResult.message
+    );
+  };
+
+  const localizedGoal = profile
+    ? calc.goals[profile.goal.id] || null
+    : null;
+  const localizedGoalTier =
+    profile && localizedGoal
+      ? localizedGoal.tiers[profile.goalTier.id] || null
+      : null;
 
   return (
     <section
@@ -222,62 +255,67 @@ export default function FitnessCalculator({ className = "" }) {
         <div className="mx-auto w-full max-w-[var(--container-wide)]">
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
-            <span className="font-display font-bold text-xs uppercase tracking-[0.2em] text-brand block mb-2">
-              Scientific Baseline Assessment
+            <span className="font-display font-bold text-xs uppercase tracking-[0.2em] rtl:tracking-normal rtl:normal-case text-brand block mb-2">
+              {calc.eyebrow}
             </span>
             <h2
               id="calculator-heading"
               className="section-heading text-2xl sm:text-3xl lg:text-[40px]"
             >
-              Fitness &amp; Nutrition Calculator
+              {calc.heading}
             </h2>
             <p className="section-subtitle mt-3 text-sm sm:text-base leading-relaxed">
-              Estimate your resting metabolic rate, daily expenditure, and macronutrient targets
-              grounded in peer-validated clinical models.
+              {calc.subtitle}
             </p>
           </div>
 
           {/* Master 2-Column Calculator Shell */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             {/* ==============================================================
-                LEFT COLUMN: ASSESSMENT PARAMETERS (7 cols)
+                LEFT COLUMN (RTL: RIGHT): ASSESSMENT PARAMETERS (7 cols)
                ============================================================== */}
             <div className="lg:col-span-7 bg-[#1c1c1c] border-[1.5px] border-white/10 rounded-card p-5 sm:p-7 space-y-6">
               {/* Header inside parameters */}
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
                   <h3 className="font-sans font-bold text-base sm:text-lg text-foreground">
-                    Physical Parameters
+                    {calc.paramsHeading}
                   </h3>
                   <p className="text-xs text-muted font-sans mt-0.5">
-                    Required physical measurements for metabolic modeling
+                    {calc.paramsSubtitle}
                   </p>
                 </div>
-                <div className="flex items-center gap-3 text-xs font-sans">
+                <div className="flex items-center gap-3 text-xs font-sans shrink-0">
                   <button
                     type="button"
                     onClick={handleLoadSample}
                     className="text-brand hover:underline cursor-pointer font-medium"
                   >
-                    Load Sample
+                    {calc.loadSample}
                   </button>
-                  <span className="text-white/20">•</span>
+                  <span className="text-white/20" aria-hidden="true">
+                    •
+                  </span>
                   <button
                     type="button"
                     onClick={handleReset}
                     className="text-muted hover:text-foreground cursor-pointer transition-colors"
                   >
-                    Reset
+                    {calc.reset}
                   </button>
                 </div>
               </div>
 
               {/* Group 1: Biological Sex */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2 font-display">
-                  Biological Sex <span className="text-brand">*</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-muted mb-2 font-display">
+                  {calc.sexLabel} <span className="text-brand">*</span>
                 </label>
-                <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Biological Sex">
+                <div
+                  className="grid grid-cols-2 gap-3"
+                  role="radiogroup"
+                  aria-label={calc.sexAriaLabel}
+                >
                   <button
                     type="button"
                     role="radio"
@@ -289,7 +327,7 @@ export default function FitnessCalculator({ className = "" }) {
                         : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                     }`}
                   >
-                    Male
+                    {calc.male}
                   </button>
                   <button
                     type="button"
@@ -302,19 +340,26 @@ export default function FitnessCalculator({ className = "" }) {
                         : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                     }`}
                   >
-                    Female
+                    {calc.female}
                   </button>
                 </div>
                 <p className="mt-1.5 text-[11px] text-muted font-sans">
-                  Calibrates the biological resting constant (+5 for male, -161 for female in Mifflin–St Jeor).
+                  {calc.sexHelperPrefix}
+                  <span dir="ltr">{calc.sexHelperMaleConst}</span>
+                  {calc.sexHelperMiddle}
+                  <span dir="ltr">{calc.sexHelperFemaleConst}</span>
+                  {calc.sexHelperSuffix}
                 </p>
               </div>
 
               {/* Group 2: Age, Height, Weight Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
-                  <label htmlFor={ageId} className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5 font-display">
-                    Age (Years) <span className="text-brand">*</span>
+                  <label
+                    htmlFor={ageId}
+                    className="block text-xs font-semibold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-muted mb-1.5 font-display"
+                  >
+                    {calc.ageLabel} <span className="text-brand">*</span>
                   </label>
                   <input
                     type="number"
@@ -323,17 +368,26 @@ export default function FitnessCalculator({ className = "" }) {
                     max="99"
                     value={inputs.age}
                     onChange={(e) => handleInputChange("age", e.target.value)}
-                    placeholder="e.g. 30"
+                    placeholder={calc.agePlaceholder}
                     className={`w-full rounded-control bg-[#141414] px-3.5 py-2.5 text-foreground placeholder-white/20 border outline-none text-sm font-sans transition-colors ${
-                      errors.age ? "border-brand focus:ring-1 focus:ring-brand" : "border-white/10 focus:border-brand"
+                      errors.age
+                        ? "border-brand focus:ring-1 focus:ring-brand"
+                        : "border-white/10 focus:border-brand"
                     }`}
                   />
-                  {errors.age && <p className="mt-1 text-xs text-brand font-sans">{errors.age}</p>}
+                  {errors.age && (
+                    <p className="mt-1 text-xs text-brand font-sans">
+                      {calc.validation[errors.age]}
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <label htmlFor={heightId} className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5 font-display">
-                    Height (cm) <span className="text-brand">*</span>
+                  <label
+                    htmlFor={heightId}
+                    className="block text-xs font-semibold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-muted mb-1.5 font-display"
+                  >
+                    {calc.heightLabel} <span className="text-brand">*</span>
                   </label>
                   <input
                     type="number"
@@ -341,18 +395,29 @@ export default function FitnessCalculator({ className = "" }) {
                     min="120"
                     max="230"
                     value={inputs.height}
-                    onChange={(e) => handleInputChange("height", e.target.value)}
-                    placeholder="e.g. 180"
+                    onChange={(e) =>
+                      handleInputChange("height", e.target.value)
+                    }
+                    placeholder={calc.heightPlaceholder}
                     className={`w-full rounded-control bg-[#141414] px-3.5 py-2.5 text-foreground placeholder-white/20 border outline-none text-sm font-sans transition-colors ${
-                      errors.height ? "border-brand focus:ring-1 focus:ring-brand" : "border-white/10 focus:border-brand"
+                      errors.height
+                        ? "border-brand focus:ring-1 focus:ring-brand"
+                        : "border-white/10 focus:border-brand"
                     }`}
                   />
-                  {errors.height && <p className="mt-1 text-xs text-brand font-sans">{errors.height}</p>}
+                  {errors.height && (
+                    <p className="mt-1 text-xs text-brand font-sans">
+                      {calc.validation[errors.height]}
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <label htmlFor={weightId} className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5 font-display">
-                    Weight (kg) <span className="text-brand">*</span>
+                  <label
+                    htmlFor={weightId}
+                    className="block text-xs font-semibold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-muted mb-1.5 font-display"
+                  >
+                    {calc.weightLabel} <span className="text-brand">*</span>
                   </label>
                   <input
                     type="number"
@@ -361,29 +426,42 @@ export default function FitnessCalculator({ className = "" }) {
                     max="250"
                     step="0.5"
                     value={inputs.weight}
-                    onChange={(e) => handleInputChange("weight", e.target.value)}
-                    placeholder="e.g. 80"
+                    onChange={(e) =>
+                      handleInputChange("weight", e.target.value)
+                    }
+                    placeholder={calc.weightPlaceholder}
                     className={`w-full rounded-control bg-[#141414] px-3.5 py-2.5 text-foreground placeholder-white/20 border outline-none text-sm font-sans transition-colors ${
-                      errors.weight ? "border-brand focus:ring-1 focus:ring-brand" : "border-white/10 focus:border-brand"
+                      errors.weight
+                        ? "border-brand focus:ring-1 focus:ring-brand"
+                        : "border-white/10 focus:border-brand"
                     }`}
                   />
-                  {errors.weight && <p className="mt-1 text-xs text-brand font-sans">{errors.weight}</p>}
+                  {errors.weight && (
+                    <p className="mt-1 text-xs text-brand font-sans">
+                      {calc.validation[errors.weight]}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Group 3: Activity Level Multiplier */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted font-display">
-                    Activity &amp; Lifestyle Multiplier <span className="text-brand">*</span>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-muted font-display">
+                    {calc.activityLabel} <span className="text-brand">*</span>
                   </label>
                   <span className="text-[11px] text-muted font-sans">
-                    Includes occupational baseline &amp; workouts
+                    {calc.activityHint}
                   </span>
                 </div>
-                <div role="radiogroup" aria-label="Activity Level" className="space-y-2">
+                <div
+                  role="radiogroup"
+                  aria-label={calc.activityAriaLabel}
+                  className="space-y-2"
+                >
                   {ACTIVITY_LEVELS.map((act) => {
                     const selected = inputs.activityId === act.id;
+                    const locAct = calc.activityLevels[act.id] || act;
                     return (
                       <button
                         key={act.id}
@@ -391,26 +469,27 @@ export default function FitnessCalculator({ className = "" }) {
                         role="radio"
                         aria-checked={selected}
                         onClick={() => handleInputChange("activityId", act.id)}
-                        className={`w-full text-left p-3 rounded-control border-[1.5px] transition-all flex items-start justify-between gap-3 cursor-pointer ${
+                        className={`w-full text-start p-3 rounded-control border-[1.5px] transition-all flex items-start justify-between gap-3 cursor-pointer ${
                           selected
                             ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                             : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                         }`}
                       >
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="font-sans font-semibold text-sm text-foreground">
-                              {act.title}
+                              {locAct.title}
                             </span>
                             <span className="text-[11px] text-muted font-sans font-normal">
-                              ({act.frequency})
+                              ({locAct.frequency})
                             </span>
                           </div>
                           <p className="text-xs text-muted font-sans mt-0.5 line-clamp-1 sm:line-clamp-none">
-                            {act.shortDesc}
+                            {locAct.shortDesc}
                           </p>
                         </div>
                         <span
+                          dir="ltr"
                           className={`shrink-0 text-xs font-display font-bold px-2 py-0.5 rounded ${
                             selected
                               ? "bg-brand text-foreground"
@@ -424,41 +503,44 @@ export default function FitnessCalculator({ className = "" }) {
                   })}
                 </div>
                 <p className="mt-1.5 text-[11px] text-muted font-sans">
-                  Note: Multipliers already account for typical exercise expenditure. Do not add separate workout burns to prevent double-counting.
+                  {calc.activityNote}
                 </p>
               </div>
 
               {/* Group 4: Primary Goal & Tier Selection */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2 font-display">
-                  Primary Transformation Goal <span className="text-brand">*</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-muted mb-2 font-display">
+                  {calc.goalLabel} <span className="text-brand">*</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {FITNESS_GOALS.map((g) => {
                     const selected = inputs.goalId === g.id;
+                    const locGoal = calc.goals[g.id] || g;
                     return (
                       <button
                         key={g.id}
                         type="button"
                         onClick={() => {
-                          const defaultTier = g.tiers.find((t) => t.isDefault) || g.tiers[0];
+                          const defaultTier =
+                            g.tiers.find((tier) => tier.isDefault) ||
+                            g.tiers[0];
                           setInputs((prev) => ({
                             ...prev,
                             goalId: g.id,
                             goalTierId: defaultTier.id,
                           }));
                         }}
-                        className={`p-3 rounded-control border-[1.5px] text-left transition-all cursor-pointer ${
+                        className={`p-3 rounded-control border-[1.5px] text-start transition-all cursor-pointer ${
                           selected
                             ? "border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_10%,#1c1c1c)] text-foreground"
                             : "border-white/10 bg-[#141414] text-muted hover:border-white/20 hover:text-foreground"
                         }`}
                       >
                         <span className="font-sans font-bold text-sm block text-foreground">
-                          {g.title}
+                          {locGoal.title}
                         </span>
                         <span className="text-[11px] text-muted font-sans mt-0.5 block">
-                          {g.tagline}
+                          {locGoal.tagline}
                         </span>
                       </button>
                     );
@@ -468,24 +550,29 @@ export default function FitnessCalculator({ className = "" }) {
                 {/* Sub-tiers for selected goal (e.g. Mild / Moderate / Aggressive) */}
                 {selectedGoalObj.tiers.length > 1 && (
                   <div className="mt-3 p-3 rounded-control bg-[#141414] border border-white/10 space-y-2">
-                    <span className="text-[11px] uppercase tracking-wider font-display font-semibold text-muted block">
-                      Target Intensity Tier
+                    <span className="text-[11px] uppercase tracking-wider rtl:tracking-normal rtl:normal-case font-display font-semibold text-muted block">
+                      {calc.tierLabel}
                     </span>
                     <div className="grid grid-cols-3 gap-2">
                       {selectedGoalObj.tiers.map((tier) => {
                         const isTierActive = inputs.goalTierId === tier.id;
+                        const locTier =
+                          calc.goals[selectedGoalObj.id]?.tiers[tier.id] ||
+                          tier;
                         return (
                           <button
                             key={tier.id}
                             type="button"
-                            onClick={() => handleInputChange("goalTierId", tier.id)}
+                            onClick={() =>
+                              handleInputChange("goalTierId", tier.id)
+                            }
                             className={`px-2 py-1.5 rounded text-xs font-sans text-center transition-colors cursor-pointer border-[1.5px] ${
                               isTierActive
                                 ? "border-brand bg-brand text-foreground font-semibold"
                                 : "border-white/10 bg-white/5 text-muted hover:text-foreground"
                             }`}
                           >
-                            {tier.label}
+                            {locTier.label}
                           </button>
                         );
                       })}
@@ -499,23 +586,30 @@ export default function FitnessCalculator({ className = "" }) {
                 <button
                   type="button"
                   onClick={() => setShowAdvanced((prev) => !prev)}
-                  className="w-full flex items-center justify-between text-left py-2 text-xs font-display font-bold uppercase tracking-wider text-muted hover:text-foreground transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between text-start py-2 text-xs font-display font-bold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-muted hover:text-foreground transition-colors cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <span>Advanced: Body Composition &amp; Calibration (Optional)</span>
-                    {(advancedInputs.bodyFatPct || advancedInputs.enableCalibration) && (
+                    <span>{calc.advancedToggle}</span>
+                    {(advancedInputs.bodyFatPct ||
+                      advancedInputs.enableCalibration) && (
                       <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                     )}
                   </span>
                   <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${showAdvanced ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
+                      showAdvanced ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth="2"
                     aria-hidden="true"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
@@ -523,45 +617,63 @@ export default function FitnessCalculator({ className = "" }) {
                   <div className="mt-3 space-y-4 pt-2">
                     {/* Method Selector */}
                     <div>
-                      <span className="block text-xs font-semibold text-muted font-display uppercase tracking-wider mb-1.5">
-                        Resting Metabolic Rate Model
+                      <span className="block text-xs font-semibold text-muted font-display uppercase tracking-wider rtl:tracking-normal rtl:normal-case mb-1.5">
+                        {calc.rmrModelLabel}
                       </span>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <button
                           type="button"
-                          onClick={() => handleAdvancedChange("bmrMethod", "mifflin")}
-                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-left cursor-pointer ${
+                          onClick={() =>
+                            handleAdvancedChange("bmrMethod", "mifflin")
+                          }
+                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-start cursor-pointer ${
                             advancedInputs.bmrMethod === "mifflin"
                               ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
                           }`}
                         >
-                          <span className="block text-foreground">Mifflin–St Jeor</span>
-                          <span className="text-[10px] text-muted">Standard Population</span>
+                          <span className="block text-foreground">
+                            {calc.rmrMethods.mifflin.title}
+                          </span>
+                          <span className="text-[10px] text-muted">
+                            {calc.rmrMethods.mifflin.subtitle}
+                          </span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleAdvancedChange("bmrMethod", "katch_mcardle")}
-                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-left cursor-pointer ${
+                          onClick={() =>
+                            handleAdvancedChange("bmrMethod", "katch_mcardle")
+                          }
+                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-start cursor-pointer ${
                             advancedInputs.bmrMethod === "katch_mcardle"
                               ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
                           }`}
                         >
-                          <span className="block text-foreground">Katch–McArdle</span>
-                          <span className="text-[10px] text-muted">Fat-Free Mass based</span>
+                          <span className="block text-foreground">
+                            {calc.rmrMethods.katch_mcardle.title}
+                          </span>
+                          <span className="text-[10px] text-muted">
+                            {calc.rmrMethods.katch_mcardle.subtitle}
+                          </span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleAdvancedChange("bmrMethod", "measured")}
-                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-left cursor-pointer ${
+                          onClick={() =>
+                            handleAdvancedChange("bmrMethod", "measured")
+                          }
+                          className={`p-2 rounded text-xs font-sans border-[1.5px] text-start cursor-pointer ${
                             advancedInputs.bmrMethod === "measured"
                               ? "border-selected-brand bg-brand/10 text-foreground font-semibold"
                               : "border-white/10 bg-[#141414] text-muted hover:text-foreground"
                           }`}
                         >
-                          <span className="block text-foreground">Measured RMR</span>
-                          <span className="text-[10px] text-muted">Clinical Calorimetry</span>
+                          <span className="block text-foreground">
+                            {calc.rmrMethods.measured.title}
+                          </span>
+                          <span className="text-[10px] text-muted">
+                            {calc.rmrMethods.measured.subtitle}
+                          </span>
                         </button>
                       </div>
                     </div>
@@ -569,8 +681,11 @@ export default function FitnessCalculator({ className = "" }) {
                     {/* Conditional Input based on Method */}
                     {advancedInputs.bmrMethod === "katch_mcardle" && (
                       <div className="p-3 bg-[#141414] border-[1.5px] border-white/10 rounded-control">
-                        <label htmlFor={bodyFatId} className="block text-xs font-medium text-foreground mb-1 font-sans">
-                          Body Fat Percentage (%)
+                        <label
+                          htmlFor={bodyFatId}
+                          className="block text-xs font-medium text-foreground mb-1 font-sans"
+                        >
+                          {calc.bodyFatLabel}
                         </label>
                         <input
                           type="number"
@@ -579,21 +694,30 @@ export default function FitnessCalculator({ className = "" }) {
                           max="55"
                           step="0.5"
                           value={advancedInputs.bodyFatPct}
-                          onChange={(e) => handleAdvancedChange("bodyFatPct", e.target.value)}
-                          placeholder="e.g. 15"
+                          onChange={(e) =>
+                            handleAdvancedChange("bodyFatPct", e.target.value)
+                          }
+                          placeholder={calc.bodyFatPlaceholder}
                           className="w-full rounded bg-[#101010] px-3 py-2 text-foreground text-xs border border-white/10 outline-none focus:border-brand"
                         />
-                        {errors.bodyFatPct && <p className="mt-1 text-xs text-brand font-sans">{errors.bodyFatPct}</p>}
+                        {errors.bodyFatPct && (
+                          <p className="mt-1 text-xs text-brand font-sans">
+                            {calc.validation[errors.bodyFatPct]}
+                          </p>
+                        )}
                         <p className="mt-1 text-[11px] text-muted font-sans">
-                          Uses Fat-Free Mass (FFM) to model metabolic rate. Recommended for muscular or athletic builds with DEXA/caliper data.
+                          {calc.bodyFatHelper}
                         </p>
                       </div>
                     )}
 
                     {advancedInputs.bmrMethod === "measured" && (
                       <div className="p-3 bg-[#141414] border border-white/10 rounded-control">
-                        <label htmlFor={measuredRmrId} className="block text-xs font-medium text-foreground mb-1 font-sans">
-                          Laboratory Measured RMR (kcal/day)
+                        <label
+                          htmlFor={measuredRmrId}
+                          className="block text-xs font-medium text-foreground mb-1 font-sans"
+                        >
+                          {calc.measuredRmrLabel}
                         </label>
                         <input
                           type="number"
@@ -601,34 +725,46 @@ export default function FitnessCalculator({ className = "" }) {
                           min="800"
                           max="3500"
                           value={advancedInputs.measuredRmr}
-                          onChange={(e) => handleAdvancedChange("measuredRmr", e.target.value)}
-                          placeholder="e.g. 1750"
+                          onChange={(e) =>
+                            handleAdvancedChange("measuredRmr", e.target.value)
+                          }
+                          placeholder={calc.measuredRmrPlaceholder}
                           className="w-full rounded bg-[#101010] px-3 py-2 text-foreground text-xs border border-white/10 outline-none focus:border-brand"
                         />
-                        {errors.measuredRmr && <p className="mt-1 text-xs text-brand font-sans">{errors.measuredRmr}</p>}
+                        {errors.measuredRmr && (
+                          <p className="mt-1 text-xs text-brand font-sans">
+                            {calc.validation[errors.measuredRmr]}
+                          </p>
+                        )}
                         <p className="mt-1 text-[11px] text-muted font-sans">
-                          Direct resting metabolic rate obtained from indirect calorimetry (metabolic cart testing).
+                          {calc.measuredRmrHelper}
                         </p>
                       </div>
                     )}
 
                     {/* Personal 14–28 Day Tracking Calibration */}
                     <div className="p-3.5 bg-[#141414] border-[1.5px] border-white/10 rounded-control space-y-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-3">
                         <div>
                           <span className="font-sans font-semibold text-xs text-foreground block">
-                            Real-World Weight &amp; Intake Calibration
+                            {calc.calibrationTitle}
                           </span>
                           <span className="text-[11px] text-muted font-sans">
-                            Calibrate true maintenance from 14–28 days of tracked intake
+                            {calc.calibrationSubtitle}
                           </span>
                         </div>
                         <input
                           type="checkbox"
                           id="enableCalibrationCheck"
+                          aria-label={calc.calibrationTitle}
                           checked={advancedInputs.enableCalibration}
-                          onChange={(e) => handleAdvancedChange("enableCalibration", e.target.checked)}
-                          className="w-4 h-4 rounded border-white/20 text-brand focus:ring-brand cursor-pointer"
+                          onChange={(e) =>
+                            handleAdvancedChange(
+                              "enableCalibration",
+                              e.target.checked,
+                            )
+                          }
+                          className="w-4 h-4 shrink-0 rounded border-white/20 text-brand focus:ring-brand cursor-pointer"
                         />
                       </div>
 
@@ -636,8 +772,11 @@ export default function FitnessCalculator({ className = "" }) {
                         <div className="pt-2 border-t border-white/10 space-y-3">
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             <div>
-                              <label htmlFor={trackingDaysId} className="block text-[11px] text-muted font-sans mb-1">
-                                Days Tracked
+                              <label
+                                htmlFor={trackingDaysId}
+                                className="block text-[11px] text-muted font-sans mb-1"
+                              >
+                                {calc.trackingDaysLabel}
                               </label>
                               <input
                                 type="number"
@@ -645,14 +784,22 @@ export default function FitnessCalculator({ className = "" }) {
                                 min="14"
                                 max="90"
                                 value={advancedInputs.trackingDays}
-                                onChange={(e) => handleAdvancedChange("trackingDays", e.target.value)}
-                                placeholder="e.g. 21"
+                                onChange={(e) =>
+                                  handleAdvancedChange(
+                                    "trackingDays",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder={calc.trackingDaysPlaceholder}
                                 className="w-full rounded bg-[#101010] px-2.5 py-1.5 text-xs text-foreground border border-white/10 outline-none focus:border-brand"
                               />
                             </div>
                             <div>
-                              <label htmlFor={avgCaloriesId} className="block text-[11px] text-muted font-sans mb-1">
-                                Avg Calories
+                              <label
+                                htmlFor={avgCaloriesId}
+                                className="block text-[11px] text-muted font-sans mb-1"
+                              >
+                                {calc.avgCaloriesLabel}
                               </label>
                               <input
                                 type="number"
@@ -660,36 +807,57 @@ export default function FitnessCalculator({ className = "" }) {
                                 min="800"
                                 max="6000"
                                 value={advancedInputs.avgDailyCalories}
-                                onChange={(e) => handleAdvancedChange("avgDailyCalories", e.target.value)}
-                                placeholder="e.g. 2400"
+                                onChange={(e) =>
+                                  handleAdvancedChange(
+                                    "avgDailyCalories",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder={calc.avgCaloriesPlaceholder}
                                 className="w-full rounded bg-[#101010] px-2.5 py-1.5 text-xs text-foreground border border-white/10 outline-none focus:border-brand"
                               />
                             </div>
                             <div>
-                              <label htmlFor={startWeightId} className="block text-[11px] text-muted font-sans mb-1">
-                                Start Wt (kg)
+                              <label
+                                htmlFor={startWeightId}
+                                className="block text-[11px] text-muted font-sans mb-1"
+                              >
+                                {calc.startWeightLabel}
                               </label>
                               <input
                                 type="number"
                                 id={startWeightId}
                                 step="0.1"
                                 value={advancedInputs.startWeightKg}
-                                onChange={(e) => handleAdvancedChange("startWeightKg", e.target.value)}
-                                placeholder="e.g. 81.0"
+                                onChange={(e) =>
+                                  handleAdvancedChange(
+                                    "startWeightKg",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder={calc.startWeightPlaceholder}
                                 className="w-full rounded bg-[#101010] px-2.5 py-1.5 text-xs text-foreground border border-white/10 outline-none focus:border-brand"
                               />
                             </div>
                             <div>
-                              <label htmlFor={endWeightId} className="block text-[11px] text-muted font-sans mb-1">
-                                End Wt (kg)
+                              <label
+                                htmlFor={endWeightId}
+                                className="block text-[11px] text-muted font-sans mb-1"
+                              >
+                                {calc.endWeightLabel}
                               </label>
                               <input
                                 type="number"
                                 id={endWeightId}
                                 step="0.1"
                                 value={advancedInputs.endWeightKg}
-                                onChange={(e) => handleAdvancedChange("endWeightKg", e.target.value)}
-                                placeholder="e.g. 80.4"
+                                onChange={(e) =>
+                                  handleAdvancedChange(
+                                    "endWeightKg",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder={calc.endWeightPlaceholder}
                                 className="w-full rounded bg-[#101010] px-2.5 py-1.5 text-xs text-foreground border border-white/10 outline-none focus:border-brand"
                               />
                             </div>
@@ -699,41 +867,72 @@ export default function FitnessCalculator({ className = "" }) {
                             <div className="p-2.5 rounded bg-black/40 border border-white/10 text-xs font-sans space-y-1.5">
                               {profile.calibrationResult.isReady ? (
                                 <>
-                                  <div className="flex items-center justify-between text-foreground">
-                                    <span className="font-semibold">Calibrated Maintenance:</span>
+                                  <div className="flex items-center justify-between gap-2 text-foreground">
+                                    <span className="font-semibold">
+                                      {calc.calibratedMaintenanceLabel}
+                                    </span>
                                     <span className="font-display font-bold text-brand">
-                                      {profile.calibrationResult.calibratedTdee.toLocaleString()} kcal/day
+                                      <span dir="ltr">
+                                        {profile.calibrationResult.calibratedTdee.toLocaleString(
+                                          "en-US",
+                                        )}
+                                      </span>{" "}
+                                      {calc.kcalPerDayShort}
                                     </span>
                                   </div>
                                   <p className="text-[11px] text-muted">
-                                    Observed trend: {profile.calibrationResult.deltaWeightKg > 0 ? "+" : ""}
-                                    {profile.calibrationResult.deltaWeightKg} kg over {profile.calibrationResult.trackingDays} days ({profile.calibrationResult.weeklyRateKg > 0 ? "+" : ""}
-                                    {profile.calibrationResult.weeklyRateKg} kg/week).
+                                    {calc.observedTrend(
+                                      `\u2066${formatSigned(profile.calibrationResult.deltaWeightKg)}\u2069`,
+                                      profile.calibrationResult.trackingDays,
+                                      `\u2066${formatSigned(profile.calibrationResult.weeklyRateKg)}\u2069`,
+                                    )}
                                   </p>
-                                  <div className="pt-1 flex items-center justify-between border-t border-white/10">
+                                  <div className="pt-1 flex items-center justify-between gap-2 border-t border-white/10">
                                     <span className="text-[11px] text-muted">
-                                      vs Theoretical Estimate ({profile.theoreticalTdee} kcal):
+                                      {calc.vsTheoretical(
+                                        profile.theoreticalTdee.toLocaleString(
+                                          "en-US",
+                                        ),
+                                      )}
                                     </span>
                                     <span className="text-[11px] font-semibold text-foreground">
-                                      {profile.calibrationResult.varianceFromTheoretical > 0 ? "+" : ""}
-                                      {profile.calibrationResult.varianceFromTheoretical} kcal ({profile.calibrationResult.variancePct}%)
+                                      <span dir="ltr">
+                                        {formatSigned(
+                                          profile.calibrationResult
+                                            .varianceFromTheoretical,
+                                        )}
+                                      </span>{" "}
+                                      {calc.kcalUnit} (
+                                      <span dir="ltr">
+                                        {profile.calibrationResult.variancePct}%
+                                      </span>
+                                      )
                                     </span>
                                   </div>
                                   <label className="flex items-center gap-2 pt-1.5 cursor-pointer">
                                     <input
                                       type="checkbox"
-                                      checked={advancedInputs.useCalibratedAsTarget}
-                                      onChange={(e) => handleAdvancedChange("useCalibratedAsTarget", e.target.checked)}
+                                      checked={
+                                        advancedInputs.useCalibratedAsTarget
+                                      }
+                                      onChange={(e) =>
+                                        handleAdvancedChange(
+                                          "useCalibratedAsTarget",
+                                          e.target.checked,
+                                        )
+                                      }
                                       className="w-3.5 h-3.5 text-brand rounded border-white/20 focus:ring-brand"
                                     />
                                     <span className="text-xs text-foreground font-medium">
-                                      Apply calibrated maintenance as my active target
+                                      {calc.applyCalibratedLabel}
                                     </span>
                                   </label>
                                 </>
                               ) : (
                                 <p className="text-[11px] text-amber-400">
-                                  {profile.calibrationResult.message}
+                                  {getLocalizedCalibrationMessage(
+                                    profile.calibrationResult,
+                                  )}
                                 </p>
                               )}
                             </div>
@@ -747,95 +946,125 @@ export default function FitnessCalculator({ className = "" }) {
             </div>
 
             {/* ==============================================================
-                RIGHT COLUMN: CALCULATED RESULTS (5 cols, sticky desktop)
+                RIGHT COLUMN (RTL: LEFT): CALCULATED RESULTS (5 cols, sticky desktop)
                ============================================================== */}
             <div className="lg:col-span-5 lg:sticky lg:top-24">
               {profile ? (
                 <div className="bg-[#1c1c1c] border-[1.5px] border-white/10 rounded-card p-5 sm:p-7 space-y-5">
                   {/* Results Header */}
-                  <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-4">
                     <div>
                       <h3 className="font-sans font-bold text-base sm:text-lg text-foreground">
-                        Calculated Targets
+                        {calc.resultsHeading}
                       </h3>
                       <p className="text-xs text-muted font-sans">
-                        Dynamic baseline derived from your parameters
+                        {calc.resultsSubtitle}
                       </p>
                     </div>
-                    <span className="text-[11px] font-sans font-medium px-2 py-0.5 rounded bg-white/5 border border-white/10 text-muted">
-                      {profile.sourceTag}
+                    <span className="text-[11px] font-sans font-medium px-2 py-0.5 rounded bg-white/5 border border-white/10 text-muted shrink-0">
+                      {getLocalizedSourceTag()}
                     </span>
                   </div>
 
                   {/* Primary Target Calorie Block */}
                   <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-4 text-center">
-                    <span className="block text-xs uppercase font-display font-semibold tracking-wider text-muted mb-1">
-                      Daily Caloric Target
+                    <span className="block text-xs uppercase font-display font-semibold tracking-wider rtl:tracking-normal rtl:normal-case text-muted mb-1">
+                      {calc.dailyTargetLabel}
                     </span>
                     <div className="flex items-baseline justify-center gap-1.5">
-                      <span className="font-display font-bold text-3xl sm:text-4xl text-foreground">
-                        {profile.targetCalories.toLocaleString()}
+                      <span
+                        dir="ltr"
+                        className="font-display font-bold text-3xl sm:text-4xl text-foreground"
+                      >
+                        {profile.targetCalories.toLocaleString("en-US")}
                       </span>
                       <span className="font-sans text-xs sm:text-sm text-muted">
-                        kcal / day
+                        {calc.kcalPerDay}
                       </span>
                     </div>
 
                     <div className="mt-2.5 inline-block text-xs font-sans font-medium px-2.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--brand-red)_12%,#141414)] text-brand border-[1.5px] border-brand/40">
-                      {profile.goal.title} ({profile.goalTier.label})
+                      {localizedGoal?.title || profile.goal.title} (
+                      {localizedGoalTier?.label || profile.goalTier.label})
                       {profile.deltaCalories !== 0 && (
-                        <span> • {profile.deltaCalories > 0 ? "+" : ""}{profile.deltaCalories} kcal</span>
+                        <span>
+                          {" "}
+                          •{" "}
+                          <span dir="ltr">
+                            {formatSigned(profile.deltaCalories)}
+                          </span>{" "}
+                          {calc.kcalUnit}
+                        </span>
                       )}
                     </div>
 
                     <p className="mt-2 text-xs text-muted font-sans leading-relaxed">
-                      {profile.goalTier.shortDesc}
+                      {localizedGoalTier?.shortDesc ||
+                        profile.goalTier.shortDesc}
                     </p>
                   </div>
 
                   {/* Secondary Metrics Row: BMR, TDEE, BMI */}
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5">
-                      <span className="block text-[11px] font-display uppercase tracking-wider text-muted">
-                        BMR
+                      <span className="block text-[11px] font-display uppercase tracking-wider rtl:tracking-normal text-muted">
+                        {calc.bmrLabel}
                       </span>
-                      <span className="font-display font-bold text-base text-foreground mt-0.5 block">
-                        {profile.bmr.toLocaleString()}
+                      <span
+                        dir="ltr"
+                        className="font-display font-bold text-base text-foreground mt-0.5 block"
+                      >
+                        {profile.bmr.toLocaleString("en-US")}
                       </span>
-                      <span className="text-[10px] text-muted font-sans block">kcal at rest</span>
+                      <span className="text-[10px] text-muted font-sans block">
+                        {calc.bmrSub}
+                      </span>
                     </div>
 
                     <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5">
-                      <span className="block text-[11px] font-display uppercase tracking-wider text-muted">
-                        TDEE
+                      <span className="block text-[11px] font-display uppercase tracking-wider rtl:tracking-normal text-muted">
+                        {calc.tdeeLabel}
                       </span>
-                      <span className="font-display font-bold text-base text-foreground mt-0.5 block">
-                        {profile.tdee.toLocaleString()}
+                      <span
+                        dir="ltr"
+                        className="font-display font-bold text-base text-foreground mt-0.5 block"
+                      >
+                        {profile.tdee.toLocaleString("en-US")}
                       </span>
-                      <span className="text-[10px] text-muted font-sans block">maintenance</span>
+                      <span className="text-[10px] text-muted font-sans block">
+                        {calc.tdeeSub}
+                      </span>
                     </div>
 
                     <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5">
-                      <span className="block text-[11px] font-display uppercase tracking-wider text-muted">
-                        BMI
+                      <span className="block text-[11px] font-display uppercase tracking-wider rtl:tracking-normal text-muted">
+                        {calc.bmiLabel}
                       </span>
-                      <span className="font-display font-bold text-base text-foreground mt-0.5 block">
+                      <span
+                        dir="ltr"
+                        className="font-display font-bold text-base text-foreground mt-0.5 block"
+                      >
                         {profile.bmi.formatted}
                       </span>
                       <span className="text-[10px] text-emerald-400 font-sans block truncate">
-                        {profile.bmi.category}
+                        {calc.bmiCategories[profile.bmi.category] ||
+                          profile.bmi.category}
                       </span>
                     </div>
                   </div>
 
                   {/* Macronutrient Distribution */}
                   <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-display font-semibold uppercase tracking-wider text-muted">
-                        Macronutrient Distribution
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-display font-semibold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-muted">
+                        {calc.macrosHeading}
                       </span>
-                      <span className="text-[11px] font-sans text-muted">
-                        ~{profile.macros.totalMacroCalories.toLocaleString()} kcal sum
+                      <span className="text-[11px] font-sans text-muted shrink-0">
+                        {calc.macrosSum(
+                          profile.macros.totalMacroCalories.toLocaleString(
+                            "en-US",
+                          ),
+                        )}
                       </span>
                     </div>
 
@@ -843,22 +1072,22 @@ export default function FitnessCalculator({ className = "" }) {
                     <div
                       className="h-2 w-full rounded-full bg-white/10 overflow-hidden flex"
                       role="progressbar"
-                      aria-label="Macronutrient distribution ratio"
+                      aria-label={calc.macrosProgressAria}
                     >
                       <div
                         style={{ width: `${profile.macros.protein.pct}%` }}
                         className="bg-brand transition-all duration-300"
-                        title={`Protein: ${profile.macros.protein.pct}%`}
+                        title={calc.proteinTitle(profile.macros.protein.pct)}
                       />
                       <div
                         style={{ width: `${profile.macros.carbs.pct}%` }}
                         className="bg-white/80 transition-all duration-300"
-                        title={`Carbohydrates: ${profile.macros.carbs.pct}%`}
+                        title={calc.carbsTitle(profile.macros.carbs.pct)}
                       />
                       <div
                         style={{ width: `${profile.macros.fat.pct}%` }}
                         className="bg-amber-400 transition-all duration-300"
-                        title={`Fat: ${profile.macros.fat.pct}%`}
+                        title={calc.fatTitle(profile.macros.fat.pct)}
                       />
                     </div>
 
@@ -866,40 +1095,49 @@ export default function FitnessCalculator({ className = "" }) {
                     <div className="grid grid-cols-3 gap-2">
                       <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5 text-center">
                         <div className="flex items-center justify-center gap-1 text-[11px] font-medium text-foreground">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand" />
-                          <span>Protein</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
+                          <span>{calc.proteinLabel}</span>
                         </div>
                         <span className="font-display font-bold text-base text-foreground mt-1 block">
-                          {profile.macros.protein.grams}g
+                          <span dir="ltr">{profile.macros.protein.grams}</span>
+                          {calc.gramUnit === "g" ? "g" : ` ${calc.gramUnit}`}
                         </span>
                         <span className="text-[10px] text-muted font-sans block">
-                          {profile.macros.protein.pct}% • {profile.macros.protein.perKg}g/kg
+                          <span dir="ltr">{profile.macros.protein.pct}%</span> •{" "}
+                          <span dir="ltr">{profile.macros.protein.perKg}</span>
+                          {calc.perKgUnit === "g/kg"
+                            ? "g/kg"
+                            : ` ${calc.perKgUnit}`}
                         </span>
                       </div>
 
                       <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5 text-center">
                         <div className="flex items-center justify-center gap-1 text-[11px] font-medium text-foreground">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                          <span>Carbs</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />
+                          <span>{calc.carbsLabel}</span>
                         </div>
                         <span className="font-display font-bold text-base text-foreground mt-1 block">
-                          {profile.macros.carbs.grams}g
+                          <span dir="ltr">{profile.macros.carbs.grams}</span>
+                          {calc.gramUnit === "g" ? "g" : ` ${calc.gramUnit}`}
                         </span>
                         <span className="text-[10px] text-muted font-sans block">
-                          {profile.macros.carbs.pct}% • Energy
+                          <span dir="ltr">{profile.macros.carbs.pct}%</span> •{" "}
+                          {calc.carbsSub}
                         </span>
                       </div>
 
                       <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-control p-2.5 text-center">
                         <div className="flex items-center justify-center gap-1 text-[11px] font-medium text-foreground">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                          <span>Fat</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                          <span>{calc.fatLabel}</span>
                         </div>
                         <span className="font-display font-bold text-base text-foreground mt-1 block">
-                          {profile.macros.fat.grams}g
+                          <span dir="ltr">{profile.macros.fat.grams}</span>
+                          {calc.gramUnit === "g" ? "g" : ` ${calc.gramUnit}`}
                         </span>
                         <span className="text-[10px] text-muted font-sans block">
-                          {profile.macros.fat.pct}% • Hormonal
+                          <span dir="ltr">{profile.macros.fat.pct}%</span> •{" "}
+                          {calc.fatSub}
                         </span>
                       </div>
                     </div>
@@ -907,8 +1145,7 @@ export default function FitnessCalculator({ className = "" }) {
 
                   {/* Professional Coach Statement */}
                   <p className="text-[11px] text-muted font-sans leading-relaxed border-t border-white/10 pt-3">
-                    Metabolic equations provide an evidence-based starting point. During your initial consultation,
-                    Coach John reviews your training history, biofeedback, and lifestyle to calibrate a personalized protocol.
+                    {calc.coachStatement}
                   </p>
 
                   {/* CTA Action */}
@@ -918,20 +1155,24 @@ export default function FitnessCalculator({ className = "" }) {
                       onClick={handleProceedToBooking}
                       className="w-full inline-flex items-center justify-center gap-2 rounded-control bg-brand px-6 py-3.5 font-display text-sm font-bold uppercase tracking-wider text-foreground hover:bg-brand-hover active:scale-[0.99] transition-all cursor-pointer shadow-[0_4px_20px_rgba(255,35,50,0.25)]"
                     >
-                      <span>Apply With This Plan</span>
+                      <span>{calc.applyCta}</span>
                       <svg
-                        className="w-4 h-4 shrink-0"
+                        className="w-4 h-4 shrink-0 rtl:rotate-180"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                         strokeWidth="2.5"
                         aria-hidden="true"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-7-7l7 7-7 7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 12h14m-7-7l7 7-7 7"
+                        />
                       </svg>
                     </button>
                     <p className="text-center text-[11px] text-muted font-sans">
-                      Pre-fills Coach John&apos;s coaching application with your baseline parameters.
+                      {calc.applyNote}
                     </p>
                   </div>
                 </div>
@@ -956,11 +1197,10 @@ export default function FitnessCalculator({ className = "" }) {
                   </div>
                   <div>
                     <h4 className="font-sans font-bold text-base text-foreground">
-                      Complete Your Parameters
+                      {calc.emptyHeading}
                     </h4>
                     <p className="text-xs text-muted font-sans mt-1 max-w-xs mx-auto leading-relaxed">
-                      Enter your age (18+), height, and current weight on the left to reveal your calculated
-                      metabolic baseline and macronutrient distribution.
+                      {calc.emptyBody}
                     </p>
                   </div>
                   <button
@@ -968,16 +1208,20 @@ export default function FitnessCalculator({ className = "" }) {
                     onClick={handleLoadSample}
                     className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-brand hover:underline cursor-pointer pt-1"
                   >
-                    <span>Load 30-year-old active sample</span>
+                    <span>{calc.emptySampleCta}</span>
                     <svg
-                      className="w-3.5 h-3.5 shrink-0"
+                      className="w-3.5 h-3.5 shrink-0 rtl:rotate-180"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       strokeWidth="2.5"
                       aria-hidden="true"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-7-7l7 7-7 7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 12h14m-7-7l7 7-7 7"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -1006,15 +1250,11 @@ export default function FitnessCalculator({ className = "" }) {
               </svg>
             </div>
             <div className="space-y-1 text-xs leading-relaxed">
-              <span className="font-display font-bold uppercase tracking-wider text-foreground text-xs block">
-                Scientific Screening &amp; Health Transparency
+              <span className="font-display font-bold uppercase tracking-wider rtl:tracking-normal rtl:normal-case text-foreground text-xs block">
+                {calc.noticeHeading}
               </span>
-              <p>
-                Calculations provide evidence-based estimates for screening and educational purposes, not clinical medical advice or dietary prescriptions. Calibration applies strictly to healthy adults aged 18+. Individuals who are pregnant or nursing, or who have chronic metabolic, hormonal, or cardiovascular conditions, should consult a qualified physician or registered dietitian before modifying dietary intake or training frequency.
-              </p>
-              <p className="text-white/60">
-                Coach John personally evaluates your health history, recovery markers, and biomechanics during your one-on-one onboarding consultation to customize every training and nutrition protocol.
-              </p>
+              <p>{calc.noticeBody1}</p>
+              <p className="text-white/60">{calc.noticeBody2}</p>
             </div>
           </div>
         </div>

@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale } from "@/i18n/LocaleProvider";
+import { getPlanById, calculateStudentDiscountPrice } from "@/data/pricing";
+
 export default function Step4ReviewSubmit({
   data,
   updateData,
@@ -7,53 +10,41 @@ export default function Step4ReviewSubmit({
   errors,
   isSubmitting,
 }) {
-  const goalLabels = {
-    weight_loss: "Weight Loss",
-    muscle_building: "Muscle Building",
-    body_recomp: "Body Recomposition",
-    general_fitness: "General Fitness",
-  };
+  const { t } = useLocale();
+  const step4 = t?.booking?.step4 || {};
+  const fields = step4.fields || {};
+  const sections = step4.sections || {};
+  const goals = t?.booking?.step2?.goals || {};
+  const experiences = t?.booking?.step2?.experiences || {};
+  const locations = t?.booking?.step3?.locations || {};
+  const genders = t?.booking?.step1?.genders || {};
 
-  const experienceLabels = {
-    beginner: "Beginner (< 6 mos)",
-    intermediate: "Intermediate (6 mos – 2 yrs)",
-    advanced: "Advanced (2+ yrs)",
-  };
+  const goalTitle = goals[data.goal]?.title || data.goal;
+  const experienceTitle = experiences[data.experience]?.title || data.experience;
+  const locationTitle = locations[data.trainingLocation]?.title || data.trainingLocation;
+  
+  const plan = getPlanById(data.package);
+  const planInfo = t?.pricing?.plans?.[plan.id] || {};
+  const planTitle = planInfo.name || plan.id;
+  const currency = t?.pricing?.currency || "SAR";
+  const period = t?.pricing?.period || "/month";
+  const studentDiscountPrice = calculateStudentDiscountPrice(plan.priceAmount);
 
-  const locationLabels = {
-    gym: "Gym Facility",
-    home: "Home Gym",
-    both: "Both / Hybrid",
-  };
-
-  const packageDetails = {
-    personal_training: {
-      name: "Personal Training",
-      price: "$200 / month",
-      desc: "Weekly customized programming & 1-on-1 coaching",
-    },
-    nutrition: {
-      name: "Diet & Nutrition",
-      price: "$150 / month",
-      desc: "Custom macros, tailored meal structures & weekly audits",
-    },
-    hybrid: {
-      name: "Training + Diet (Complete Transformation)",
-      price: "$300 / month",
-      desc: "Comprehensive workout programming + customized nutrition coaching",
-    },
-  };
-
-  const selectedPkg = packageDetails[data.package] || packageDetails.hybrid;
+  const genderLabel =
+    data.gender === "Male"
+      ? genders.male || "Male"
+      : data.gender === "Female"
+      ? genders.female || "Female"
+      : genders.other || data.gender;
 
   return (
     <div className="space-y-7">
       <div>
         <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight text-foreground">
-          Step 4: Review & Confirm
+          {step4.title || "Step 4: Review & Confirm"}
         </h3>
         <p className="mt-1 text-sm text-muted font-sans">
-          Review your information below before submitting your coaching application.
+          {step4.subtitle || "Review your information below before submitting your coaching application."}
         </p>
       </div>
 
@@ -63,33 +54,33 @@ export default function Step4ReviewSubmit({
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
               <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
-                Personal Information
+                {sections.personal || "Personal Information"}
               </h4>
               <button
                 type="button"
                 onClick={() => goToStep(1)}
                 className="text-xs font-sans font-semibold text-brand hover:underline cursor-pointer"
               >
-                Edit
+                {step4.edit || "Edit"}
               </button>
             </div>
             <dl className="space-y-1.5 text-xs sm:text-sm">
               <div className="flex justify-between">
-                <dt className="text-muted">Full Name:</dt>
+                <dt className="text-muted">{fields.fullName || "Full Name:"}</dt>
                 <dd className="font-medium text-foreground">{data.fullName}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Email:</dt>
-                <dd className="font-medium text-foreground">{data.email}</dd>
+                <dt className="text-muted">{fields.email || "Email:"}</dt>
+                <dd className="font-medium text-foreground truncate max-w-[190px]">{data.email}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Phone:</dt>
-                <dd className="font-medium text-foreground">{data.phone}</dd>
+                <dt className="text-muted">{fields.phone || "Phone:"}</dt>
+                <dd className="font-medium text-foreground" dir="ltr">{data.phone}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Age / Gender:</dt>
+                <dt className="text-muted">{fields.ageGender || "Age / Gender:"}</dt>
                 <dd className="font-medium text-foreground">
-                  {data.age} yrs • {data.gender}
+                  {data.age} {fields.years || "yrs"} • {genderLabel}
                 </dd>
               </div>
             </dl>
@@ -101,41 +92,41 @@ export default function Step4ReviewSubmit({
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
               <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
-                Fitness Profile
+                {sections.fitness || "Fitness Profile"}
               </h4>
               <button
                 type="button"
                 onClick={() => goToStep(2)}
                 className="text-xs font-sans font-semibold text-brand hover:underline cursor-pointer"
               >
-                Edit
+                {step4.edit || "Edit"}
               </button>
             </div>
             <dl className="space-y-1.5 text-xs sm:text-sm">
               <div className="flex justify-between">
-                <dt className="text-muted">Height:</dt>
+                <dt className="text-muted">{fields.height || "Height:"}</dt>
                 <dd className="font-medium text-foreground">{data.height} cm</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Current Weight:</dt>
+                <dt className="text-muted">{fields.currentWeight || "Current Weight:"}</dt>
                 <dd className="font-medium text-foreground">{data.currentWeight} kg</dd>
               </div>
               {data.targetWeight && (
                 <div className="flex justify-between">
-                  <dt className="text-muted">Target Weight:</dt>
+                  <dt className="text-muted">{fields.targetWeight || "Target Weight:"}</dt>
                   <dd className="font-medium text-brand">{data.targetWeight} kg</dd>
                 </div>
               )}
               <div className="flex justify-between">
-                <dt className="text-muted">Primary Goal:</dt>
+                <dt className="text-muted">{fields.goal || "Primary Goal:"}</dt>
                 <dd className="font-medium text-foreground">
-                  {goalLabels[data.goal] || data.goal}
+                  {goalTitle}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Experience:</dt>
+                <dt className="text-muted">{fields.experience || "Experience:"}</dt>
                 <dd className="font-medium text-foreground">
-                  {experienceLabels[data.experience] || data.experience}
+                  {experienceTitle}
                 </dd>
               </div>
             </dl>
@@ -147,32 +138,32 @@ export default function Step4ReviewSubmit({
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
               <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
-                Training & Schedule
+                {sections.training || "Training & Schedule"}
               </h4>
               <button
                 type="button"
                 onClick={() => goToStep(3)}
                 className="text-xs font-sans font-semibold text-brand hover:underline cursor-pointer"
               >
-                Edit
+                {step4.edit || "Edit"}
               </button>
             </div>
             <dl className="space-y-1.5 text-xs sm:text-sm">
               <div className="flex justify-between">
-                <dt className="text-muted">Location:</dt>
+                <dt className="text-muted">{fields.location || "Location:"}</dt>
                 <dd className="font-medium text-foreground">
-                  {locationLabels[data.trainingLocation] || data.trainingLocation}
+                  {locationTitle}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Frequency:</dt>
+                <dt className="text-muted">{fields.frequency || "Frequency:"}</dt>
                 <dd className="font-medium text-foreground">
-                  {data.daysPerWeek} days per week
+                  {data.daysPerWeek} {fields.daysPerWeek || "days per week"}
                 </dd>
               </div>
               {data.notes && (
                 <div className="pt-2 border-t border-white/5 mt-2">
-                  <dt className="text-xs text-muted mb-0.5">Notes / Limitations:</dt>
+                  <dt className="text-xs text-muted mb-0.5">{fields.notes || "Notes / Limitations:"}</dt>
                   <dd className="text-xs text-foreground/80 italic line-clamp-2">
                     &ldquo;{data.notes}&rdquo;
                   </dd>
@@ -187,28 +178,35 @@ export default function Step4ReviewSubmit({
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-brand/30">
               <h4 className="font-display font-bold text-sm uppercase text-brand tracking-wide">
-                Selected Package
+                {sections.package || "Selected Package"}
               </h4>
               <button
                 type="button"
                 onClick={() => goToStep(3)}
                 className="text-xs font-sans font-semibold text-brand hover:underline cursor-pointer"
               >
-                Edit
+                {step4.edit || "Edit"}
               </button>
             </div>
             <div className="space-y-2">
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline justify-between gap-2">
                 <span className="font-display font-bold text-base text-foreground">
-                  {selectedPkg.name}
+                  {planTitle}
                 </span>
-                <span className="font-display font-extrabold text-lg text-brand">
-                  {selectedPkg.price}
+                <span className="font-display font-extrabold text-lg text-brand whitespace-nowrap">
+                  {plan.priceAmount} {currency}{" "}
+                  <span className="text-xs font-sans text-muted">{period}</span>
                 </span>
               </div>
               <p className="text-xs text-muted leading-relaxed font-sans">
-                {selectedPkg.desc}
+                {planInfo.description}
               </p>
+              <div className="mt-2 pt-2 border-t border-brand/20 flex items-center justify-between text-xs text-muted font-sans">
+                <span>{t?.pricing?.studentDiscount || "25% Student Discount"}:</span>
+                <span className="font-medium text-foreground/80">
+                  ~{studentDiscountPrice} {currency} {period}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -226,8 +224,8 @@ export default function Step4ReviewSubmit({
             className="mt-1 h-4 w-4 rounded border-white/20 bg-background text-brand focus:ring-brand focus:ring-offset-0 cursor-pointer accent-brand"
           />
           <span className="text-xs sm:text-sm text-foreground/90 font-sans leading-relaxed">
-            I confirm that the information provided is accurate and agree to have it
-            used for this demo booking experience.{" "}
+            {step4.consentText ||
+              "I confirm that the information provided is accurate and agree to have it used for this demo booking experience."}{" "}
             <span className="text-brand font-medium">*</span>
           </span>
         </label>
@@ -256,7 +254,11 @@ export default function Step4ReviewSubmit({
             />
           </svg>
           <span>
-            <span className="font-medium text-foreground/80">Demo Notice:</span> This is an interactive portfolio prototype. No personal data is stored in databases or transmitted to third-party services.
+            <span className="font-medium text-foreground/80">
+              {step4.demoNoticeTag || "Demo Notice:"}
+            </span>{" "}
+            {step4.demoNoticeText ||
+              "This is an interactive portfolio prototype. No personal data is stored in databases or transmitted to third-party services."}
           </span>
         </p>
       </div>

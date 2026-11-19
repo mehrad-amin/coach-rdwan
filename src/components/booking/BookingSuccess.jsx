@@ -1,20 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { getPlanById } from "@/data/pricing";
 
 export default function BookingSuccess({ data, onReset }) {
-  const packageNames = {
-    personal_training: "Personal Training ($200/mo)",
-    nutrition: "Diet & Nutrition ($150/mo)",
-    hybrid: "Training + Diet Package ($300/mo)",
-  };
+  const { t } = useLocale();
+  const success = t?.booking?.success || {};
+  const goals = t?.booking?.step2?.goals || {};
 
-  const goalLabels = {
-    weight_loss: "Weight Loss",
-    muscle_building: "Muscle Building",
-    body_recomp: "Body Recomposition",
-    general_fitness: "General Fitness",
-  };
+  const goalTitle = goals[data.goal]?.title || data.goal || "Fitness Transformation";
+  const plan = getPlanById(data.package);
+  const planInfo = t?.pricing?.plans?.[plan.id] || {};
+  const planTitle = planInfo.name || plan.id;
+  const currency = t?.pricing?.currency || "SAR";
+  const period = t?.pricing?.period || "/month";
 
   return (
     <div className="py-6 sm:py-10 text-center space-y-8">
@@ -38,41 +38,44 @@ export default function BookingSuccess({ data, onReset }) {
       {/* Main Success Heading */}
       <div className="space-y-2">
         <h3 className="font-display font-extrabold uppercase text-2xl sm:text-3xl lg:text-4xl tracking-tight text-foreground">
-          Application Completed!
+          {success.title || "Application Completed!"}
         </h3>
         <p className="font-sans text-base sm:text-lg text-muted max-w-lg mx-auto leading-relaxed">
-          Thank you, <span className="font-semibold text-foreground">{data.fullName || "Athlete"}</span>!
-          Your coaching request has been simulated and successfully processed.
+          {success.message
+            ? success.message(data.fullName)
+            : `Thank you, ${data.fullName || "Athlete"}! Your coaching request has been simulated and successfully processed.`}
         </p>
       </div>
 
       {/* Summary Box */}
-      <div className="max-w-md mx-auto rounded-2xl border border-white/10 bg-[#141414] p-5 sm:p-6 text-left space-y-3.5">
+      <div className="max-w-md mx-auto rounded-2xl border border-white/10 bg-[#141414] p-5 sm:p-6 text-start space-y-3.5">
         <h4 className="font-display font-bold text-xs uppercase tracking-wider text-muted border-b border-white/10 pb-2">
-          Application Summary
+          {success.summaryTitle || "Application Summary"}
         </h4>
         <div className="space-y-2 text-xs sm:text-sm">
           <div className="flex justify-between items-center">
-            <span className="text-muted">Selected Package:</span>
-            <span className="font-bold text-brand text-right">
-              {packageNames[data.package] || "Training + Diet ($300/mo)"}
+            <span className="text-muted">{success.packageLabel || "Selected Package:"}</span>
+            <span className="font-bold text-brand">
+              {planTitle} ({plan.priceAmount} {currency}{period ? ` • ${period}` : ""})
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted">Primary Goal:</span>
-            <span className="font-medium text-foreground text-right">
-              {goalLabels[data.goal] || "Fitness Transformation"}
+            <span className="text-muted">{success.goalLabel || "Primary Goal:"}</span>
+            <span className="font-medium text-foreground">
+              {goalTitle}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted">Weekly Schedule:</span>
-            <span className="font-medium text-foreground text-right">
-              {data.daysPerWeek ? `${data.daysPerWeek} Days/Week` : "Flexible"}
+            <span className="text-muted">{success.scheduleLabel || "Weekly Schedule:"}</span>
+            <span className="font-medium text-foreground">
+              {data.daysPerWeek
+                ? `${data.daysPerWeek} ${success.daysWeekUnit || "Days/Week"}`
+                : success.flexible || "Flexible"}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted">Contact Info:</span>
-            <span className="font-medium text-foreground text-right truncate max-w-[200px]">
+            <span className="text-muted">{success.contactLabel || "Contact Info:"}</span>
+            <span className="font-medium text-foreground truncate max-w-[200px]" dir="ltr">
               {data.email}
             </span>
           </div>
@@ -97,7 +100,11 @@ export default function BookingSuccess({ data, onReset }) {
             />
           </svg>
           <span>
-            <span className="font-medium text-foreground/80">Demo notice:</span> This was an interactive portfolio demonstration. No personal information has been transmitted to external servers, databases, or third-party APIs.
+            <span className="font-medium text-foreground/80">
+              {success.demoNoticeTag || "Demo notice:"}
+            </span>{" "}
+            {success.demoNoticeText ||
+              "This was an interactive portfolio demonstration. No personal information has been transmitted to external servers, databases, or third-party APIs."}
           </span>
         </p>
       </div>
@@ -108,7 +115,7 @@ export default function BookingSuccess({ data, onReset }) {
           href="/"
           className="w-full sm:w-auto inline-flex items-center justify-center rounded-control bg-brand px-8 py-4 font-display text-base font-bold uppercase tracking-wider text-foreground shadow-[0_4px_24px_rgba(255,35,50,0.35)] transition-all duration-300 hover:bg-brand-hover hover:shadow-[0_6px_32px_rgba(255,35,50,0.5)] active:scale-95 cursor-pointer"
         >
-          Return to Homepage
+          {success.returnHome || "Return to Homepage"}
         </Link>
         {onReset && (
           <button
@@ -116,7 +123,7 @@ export default function BookingSuccess({ data, onReset }) {
             onClick={onReset}
             className="w-full sm:w-auto inline-flex items-center justify-center rounded-control border border-white/15 px-6 py-4 font-display text-base font-bold uppercase tracking-wider text-muted hover:text-foreground hover:border-white/30 transition-all cursor-pointer"
           >
-            Submit Another Demo
+            {success.submitAnother || "Submit Another Demo"}
           </button>
         )}
       </div>

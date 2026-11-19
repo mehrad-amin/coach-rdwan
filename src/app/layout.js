@@ -1,4 +1,17 @@
-import { Outfit, Oxanium } from "next/font/google";
+import { cookies } from "next/headers";
+import {
+  Cairo,
+  IBM_Plex_Sans_Arabic,
+  Outfit,
+  Oxanium,
+} from "next/font/google";
+import { LocaleProvider } from "@/i18n/LocaleProvider";
+import {
+  LOCALE_COOKIE,
+  getDirection,
+  normalizeLocale,
+} from "@/i18n/config";
+import { getDictionary } from "@/i18n";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -13,69 +26,93 @@ const oxanium = Oxanium({
   display: "swap",
 });
 
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
+  display: "swap",
+});
+
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ibm-plex-arabic",
+  display: "swap",
+});
+
 export const viewport = {
   themeColor: "#1a1a1a",
   colorScheme: "dark",
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://coach-john-fitness.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-export const metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Personal Trainer | John DOE",
-    template: "%s | John DOE Personal Trainer",
-  },
-  description:
-    "As a passionate personal trainer, I believe in empowering individuals to achieve their fitness goals through personalized coaching, evidence-based nutrition, and progressive strength training.",
-  keywords: [
-    "personal trainer",
-    "fitness coach",
-    "strength training",
-    "nutrition coaching",
-    "body recomposition",
-    "workout program",
-    "fitness calculator",
-    "TDEE calculator",
-  ],
-  authors: [{ name: "Coach John" }],
-  creator: "Coach John",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: siteUrl,
-    title: "Personal Trainer | John DOE",
-    description:
-      "Transform challenges into triumphs with personalized coaching, evidence-based nutrition, and progressive strength training.",
-    siteName: "Personal Trainer John DOE",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Personal Trainer | John DOE",
-    description:
-      "Transform challenges into triumphs with personalized coaching, evidence-based nutrition, and progressive strength training.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+export async function generateMetadata() {
+  const cookieStore = await cookies();
+  const locale = normalizeLocale(cookieStore.get(LOCALE_COOKIE)?.value);
+  const dict = getDictionary(locale);
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: dict.metadata.titleDefault,
+      template: dict.metadata.titleTemplate,
+    },
+    description: dict.metadata.description,
+    keywords: [
+      "RDWAN",
+      "رضوان",
+      "تدريب أونلاين",
+      "باورليفتينق",
+      "كمال أجسام",
+      "مدرب شخصي السعودية",
+      "powerlifting coach",
+      "bodybuilding coach",
+      "online fitness coaching",
+      "strength training",
+      "Saudi Arabia fitness coach",
+    ],
+    authors: [{ name: dict.navbar.brandName }],
+    creator: dict.navbar.brandName,
+    openGraph: {
+      type: "website",
+      locale: dict.metadata.ogLocale,
+      url: siteUrl,
+      title: dict.metadata.titleDefault,
+      description: dict.metadata.description,
+      siteName: dict.metadata.siteName,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dict.metadata.titleDefault,
+      description: dict.metadata.description,
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-};
+  };
+}
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cookieStore = await cookies();
+  const locale = normalizeLocale(cookieStore.get(LOCALE_COOKIE)?.value);
+  const dir = getDirection(locale);
+
   return (
     <html
-      lang="en"
-      className={`${outfit.variable} ${oxanium.variable} h-full antialiased`}
+      lang={locale}
+      dir={dir}
+      className={`${outfit.variable} ${oxanium.variable} ${cairo.variable} ${ibmPlexSansArabic.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background font-sans text-foreground overflow-x-clip">
-        {children}
+        <LocaleProvider initialLocale={locale}>{children}</LocaleProvider>
       </body>
     </html>
   );

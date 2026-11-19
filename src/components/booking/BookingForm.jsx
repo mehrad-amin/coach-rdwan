@@ -1,11 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { PRICING_CONFIG } from "@/data/pricing";
 import Step1PersonalInfo from "./Step1PersonalInfo";
 import Step2FitnessProfile from "./Step2FitnessProfile";
 import Step3TrainingLifestyle from "./Step3TrainingLifestyle";
 import Step4ReviewSubmit from "./Step4ReviewSubmit";
 import BookingSuccess from "./BookingSuccess";
+
+const DEFAULT_PACKAGE_ID =
+  PRICING_CONFIG.plans[PRICING_CONFIG.defaultActiveIndex]?.id ||
+  "performance-coaching";
 
 const INITIAL_FORM_DATA = {
   fullName: "",
@@ -20,86 +26,128 @@ const INITIAL_FORM_DATA = {
   experience: "beginner",
   trainingLocation: "gym",
   daysPerWeek: 4,
-  package: "hybrid",
+  package: DEFAULT_PACKAGE_ID,
   notes: "",
   consent: false,
 };
 
-const STEP_TITLES = [
-  "Personal Info",
-  "Fitness Profile",
-  "Training & Lifestyle",
-  "Review & Confirm",
-];
-
 export default function BookingForm() {
+  const { t } = useLocale();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasPrefilled, setHasPrefilled] = useState(false);
 
-  // Safely prefill from scientific calculator sessionStorage on client mount
+  const stepTitles = t?.booking?.steps?.titles || [
+    "Personal Info",
+    "Fitness Profile",
+    "Training & Lifestyle",
+    "Review & Confirm",
+  ];
+
+  // Safely prefill package selection and scientific calculator data on client mount
   useEffect(() => {
     const handle = requestAnimationFrame(() => {
       try {
         if (typeof window === "undefined") return;
+
+        // 1. Resolve selected plan from URL query (?plan=... or ?package=...) or sessionStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryPlan = urlParams.get("plan") || urlParams.get("package");
+        const storedPlan = sessionStorage.getItem("pt_selected_plan");
+        const validPlanIds = PRICING_CONFIG.plans.map((p) => p.id);
+
+        let resolvedPlan = null;
+        if (queryPlan && validPlanIds.includes(queryPlan)) {
+          resolvedPlan = queryPlan;
+          try {
+            sessionStorage.setItem("pt_selected_plan", queryPlan);
+          } catch {}
+        } else if (storedPlan && validPlanIds.includes(storedPlan)) {
+          resolvedPlan = storedPlan;
+        }
+
+        // 2. Read scientific calculator data
         const raw = sessionStorage.getItem("pt_fitness_calculator_v1");
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (!parsed || !parsed.inputs) return;
+        const parsed = raw ? JSON.parse(raw) : null;
 
         setFormData((prev) => {
           const next = { ...prev };
-          let applied = false;
+          let appliedCalc = false;
 
-          // Biological sex -> Gender (if not already entered)
-          if (!next.gender && parsed.inputs.sex) {
-            next.gender = parsed.inputs.sex === "female" ? "Female" : "Male";
-            applied = true;
+          // Apply resolved package if found
+          if (resolvedPlan) {
+            next.package = resolvedPlan;
           }
 
-          // Age (if not already entered)
-          if (!next.age && parsed.inputs.age) {
-            next.age = String(parsed.inputs.age);
-            applied = true;
-          }
+          if (parsed && parsed.inputs) {
+            // Biological sex -> Gender (if not already entered)
+            if (!next.gender && parsed.inputs.sex) {
+              next.gender = parsed.inputs.sex === "female" ? "Female" : "Male";
+              appliedCalc = true;
+            }
 
-          // Height (if not already entered)
-          if (!next.height && parsed.inputs.height) {
-            next.height = String(parsed.inputs.height);
-            applied = true;
-          }
+            // Age (if not already entered)
+            if (!next.age && parsed.inputs.age) {
+              next.age = String(parsed.inputs.age);
+              appliedCalc = true;
+            }
 
-          // Weight (if not already entered)
-          if (!next.currentWeight && parsed.inputs.weight) {
-            next.currentWeight = String(parsed.inputs.weight);
-            applied = true;
-          }
+            // Height (if not already entered)
+            if (!next.height && parsed.inputs.height) {
+              next.height = String(parsed.inputs.height);
+              appliedCalc = true;
+            }
 
-          // Goal mapping
-          if (parsed.inputs.goalId) {
-            if (parsed.inputs.goalId === "fat_loss") {
-              next.goal = "weight_loss";
-              applied = true;
-            } else if (parsed.inputs.goalId === "muscle_building") {
-              next.goal = "muscle_building";
-              applied = true;
-            } else if (parsed.inputs.goalId === "maintenance") {
-              next.goal = "general_fitness";
-              applied = true;
+            // Weight (if not already entered)
+            if (!next.currentWeight && parsed.inputs.weight) {
+              next.currentWeight = String(parsed.inputs.weight);
+              appliedCalc = true;
+            }
+
+            // Goal mapping
+            if (parsed.inputs.goalId) {
+              if (parsed.inputs.goalId === "fat_loss") {
+                next.goal = "weight_loss";
+                appliedCalc = true;
+              } else if (parsed.inputs.goalId === "muscle_building") {
+                next.goal = "muscle_building";
+                appliedCalc = true;
+              } else if (parsed.inputs.goalId === "maintenance") {
+                next.goal = "general_fitness";
+                appliedCalc = true;
+              }
+            }
+
+            // Coach notes prefill with scientific calculator targets
+            if (!next.notes && parsed.results) {
+              const {
+                targetCalories,
+                protein,
+                fat,
+                carbs,
+                bmr,
+                tdee,
+                bmi,
+                sourceTag,
+                isCalibrated,
+                activityTitle,
+                goalTitle,
+              } = parsed.results;
+              const tag = sourceTag || (isCalibrated ? "Calibrated Tracking" : "Scientific Baseline");
+              const meta = [
+                activityTitle ? `Activity: ${activityTitle}` : null,
+                goalTitle ? `Goal: ${goalTitle}` : null,
+              ]
+                .filter(Boolean)
+                .join(" | ");
+              next.notes = `[${tag}] Target: ${Number(targetCalories).toLocaleString()} kcal/day | Protein: ${protein}g | Carbs: ${carbs}g | Fat: ${fat}g | BMR: ${bmr} kcal | TDEE: ${tdee} kcal | BMI: ${bmi}${meta ? ` | ${meta}` : ""}`;
+              appliedCalc = true;
             }
           }
 
-          // Coach notes prefill with scientific calculator targets
-          if (!next.notes && parsed.results) {
-            const { targetCalories, protein, fat, carbs, bmr, tdee, bmi, sourceTag, isCalibrated } = parsed.results;
-            const tag = sourceTag || (isCalibrated ? "Calibrated Tracking" : "Scientific Baseline");
-            next.notes = `[${tag}] Target: ${targetCalories.toLocaleString()} kcal/day | Protein: ${protein}g | Carbs: ${carbs}g | Fat: ${fat}g | BMR: ${bmr} kcal | TDEE: ${tdee} kcal | BMI: ${bmi}`;
-            applied = true;
-          }
-
-          if (applied) {
+          if (appliedCalc) {
             setHasPrefilled(true);
           }
 
@@ -114,6 +162,11 @@ export default function BookingForm() {
   }, []);
 
   const updateData = (fields) => {
+    if (fields.package) {
+      try {
+        sessionStorage.setItem("pt_selected_plan", fields.package);
+      } catch {}
+    }
     setFormData((prev) => ({ ...prev, ...fields }));
     // Clear field errors as user updates
     const fieldKeys = Object.keys(fields);
@@ -128,60 +181,61 @@ export default function BookingForm() {
 
   const validateStep = (step) => {
     const newErrors = {};
+    const val = t?.booking?.validation || {};
 
     if (step === 1) {
       if (!formData.fullName || formData.fullName.trim().length < 2) {
-        newErrors.fullName = "Please enter your full name (minimum 2 characters).";
+        newErrors.fullName = val.fullName || "Please enter your full name (minimum 2 characters).";
       }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!formData.email || !emailRegex.test(formData.email.trim())) {
-        newErrors.email = "Please enter a valid email address.";
+        newErrors.email = val.email || "Please enter a valid email address.";
       }
       const phoneDigits = (formData.phone || "").replace(/\D/g, "");
       if (!formData.phone || phoneDigits.length < 8) {
-        newErrors.phone = "Please enter a valid phone or WhatsApp number (min 8 digits).";
+        newErrors.phone = val.phone || "Please enter a valid phone or WhatsApp number (min 8 digits).";
       }
       const ageNum = parseInt(formData.age, 10);
       if (!formData.age || isNaN(ageNum) || ageNum < 16 || ageNum > 85) {
-        newErrors.age = "Please enter an age between 16 and 85.";
+        newErrors.age = val.age || "Please enter an age between 16 and 85.";
       }
       if (!formData.gender) {
-        newErrors.gender = "Please select your gender.";
+        newErrors.gender = val.gender || "Please select your gender.";
       }
     } else if (step === 2) {
       const heightNum = parseFloat(formData.height);
       if (!formData.height || isNaN(heightNum) || heightNum < 120 || heightNum > 230) {
-        newErrors.height = "Please enter a realistic height between 120 and 230 cm.";
+        newErrors.height = val.height || "Please enter a realistic height between 120 and 230 cm.";
       }
       const weightNum = parseFloat(formData.currentWeight);
       if (!formData.currentWeight || isNaN(weightNum) || weightNum < 35 || weightNum > 250) {
-        newErrors.currentWeight = "Please enter your current weight between 35 and 250 kg.";
+        newErrors.currentWeight = val.currentWeight || "Please enter your current weight between 35 and 250 kg.";
       }
       if (formData.targetWeight) {
         const targetNum = parseFloat(formData.targetWeight);
         if (isNaN(targetNum) || targetNum < 35 || targetNum > 250) {
-          newErrors.targetWeight = "Target weight must be between 35 and 250 kg.";
+          newErrors.targetWeight = val.targetWeight || "Target weight must be between 35 and 250 kg.";
         }
       }
       if (!formData.goal) {
-        newErrors.goal = "Please select your primary fitness goal.";
+        newErrors.goal = val.goal || "Please select your primary fitness goal.";
       }
       if (!formData.experience) {
-        newErrors.experience = "Please select your training experience level.";
+        newErrors.experience = val.experience || "Please select your training experience level.";
       }
     } else if (step === 3) {
       if (!formData.trainingLocation) {
-        newErrors.trainingLocation = "Please select your preferred training location.";
+        newErrors.trainingLocation = val.trainingLocation || "Please select your preferred training location.";
       }
       if (!formData.daysPerWeek) {
-        newErrors.daysPerWeek = "Please select your available training days per week.";
+        newErrors.daysPerWeek = val.daysPerWeek || "Please select your available training days per week.";
       }
       if (!formData.package) {
-        newErrors.package = "Please select a coaching package.";
+        newErrors.package = val.package || "Please select a coaching package.";
       }
     } else if (step === 4) {
       if (!formData.consent) {
-        newErrors.consent = "Please agree to the consent statement to complete this demo application.";
+        newErrors.consent = val.consent || "Please agree to the consent statement to complete this demo application.";
       }
     }
 
@@ -246,10 +300,12 @@ export default function BookingForm() {
             <div className="mb-6 sm:mb-8 pb-5 border-b border-white/10">
               <div className="flex items-center justify-between mb-3">
                 <span className="font-display font-bold text-xs uppercase tracking-widest text-brand">
-                  Step {currentStep} of 4
+                  {t?.booking?.steps?.stepOf
+                    ? t.booking.steps.stepOf(currentStep, 4)
+                    : `Step ${currentStep} of 4`}
                 </span>
                 <span className="text-xs font-sans text-muted">
-                  {STEP_TITLES[currentStep - 1]}
+                  {stepTitles[currentStep - 1]}
                 </span>
               </div>
 
@@ -263,7 +319,7 @@ export default function BookingForm() {
 
               {/* Step Dots Indicators */}
               <div className="hidden sm:grid grid-cols-4 gap-2 mt-4">
-                {STEP_TITLES.map((title, idx) => {
+                {stepTitles.map((title, idx) => {
                   const stepNumber = idx + 1;
                   const isDone = currentStep > stepNumber;
                   const isCurrent = currentStep === stepNumber;
@@ -274,7 +330,7 @@ export default function BookingForm() {
                       type="button"
                       disabled={stepNumber > currentStep}
                       onClick={() => goToStep(stepNumber)}
-                      className={`text-left text-xs font-sans transition-colors cursor-pointer ${
+                      className={`text-start text-xs font-sans transition-colors cursor-pointer ${
                         isCurrent
                           ? "text-foreground font-semibold"
                           : isDone
@@ -301,16 +357,20 @@ export default function BookingForm() {
                     </svg>
                   </span>
                   <span>
-                    <strong className="font-semibold text-brand">Scientific Baseline Applied:</strong> Prefilled with your fitness calculator parameters &amp; caloric target.
+                    <strong className="font-semibold text-brand">
+                      {t?.booking?.prefillNotice?.tag || "Scientific Baseline Applied:"}
+                    </strong>{" "}
+                    {t?.booking?.prefillNotice?.text ||
+                      "Prefilled with your fitness calculator parameters & caloric target."}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setHasPrefilled(false)}
-                  aria-label="Dismiss notification"
+                  aria-label={t?.booking?.prefillNotice?.dismiss || "Dismiss notification"}
                   className="shrink-0 text-muted hover:text-foreground text-xs underline cursor-pointer"
                 >
-                  Dismiss
+                  {t?.booking?.prefillNotice?.dismiss || "Dismiss"}
                 </button>
               </div>
             )}
@@ -361,7 +421,7 @@ export default function BookingForm() {
                     className="inline-flex items-center justify-center gap-2 rounded-control border border-white/15 px-6 py-3.5 font-display text-sm font-bold uppercase tracking-wider text-muted hover:text-foreground hover:border-white/30 transition-all cursor-pointer disabled:opacity-50"
                   >
                     <svg
-                      className="w-4 h-4 shrink-0"
+                      className="w-4 h-4 shrink-0 transition-transform rtl:rotate-180"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -370,7 +430,7 @@ export default function BookingForm() {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m7 7l-7-7 7-7" />
                     </svg>
-                    <span>Back</span>
+                    <span>{t?.booking?.nav?.back || "Back"}</span>
                   </button>
                 ) : (
                   <div />
@@ -382,9 +442,9 @@ export default function BookingForm() {
                     onClick={handleNext}
                     className="inline-flex items-center justify-center gap-2 rounded-control bg-brand px-8 py-3.5 font-display text-sm font-bold uppercase tracking-wider text-foreground shadow-[0_4px_20px_rgba(255,35,50,0.35)] transition-all hover:bg-brand-hover hover:shadow-[0_6px_28px_rgba(255,35,50,0.5)] active:scale-95 cursor-pointer"
                   >
-                    <span>Continue</span>
+                    <span>{t?.booking?.nav?.continue || "Continue"}</span>
                     <svg
-                      className="w-4 h-4 shrink-0"
+                      className="w-4 h-4 shrink-0 transition-transform rtl:rotate-180"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -426,10 +486,10 @@ export default function BookingForm() {
                             d="M4 12a8 8 0 018-8v8H4z"
                           />
                         </svg>
-                        Processing...
+                        {t?.booking?.nav?.submitting || "Processing..."}
                       </span>
                     ) : (
-                      "Submit Application"
+                      t?.booking?.nav?.submit || "Submit Application"
                     )}
                   </button>
                 )}

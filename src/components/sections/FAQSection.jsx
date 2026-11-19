@@ -1,37 +1,60 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "@/i18n/LocaleProvider";
 
 /**
- * Original Figma questions and content from frame "Frame 32" (node 1:1418)
- * - Item 1: Original question and original Figma placeholder answer preserved 100%
- * - Items 2-4: Original questions preserved 100%; answers provide objective, realistic
- *   fitness guidance without fabricating claims, pricing, or coach policies.
+ * 8 verified coaching FAQs personalized for Coach Rdwan.
+ * Defaults to English; localized via useLocale() and i18n dictionaries.
  */
 export const DEFAULT_FAQS = [
   {
-    id: "exercise-frequency",
-    question: "How often should I exercise?",
+    id: "online-coaching",
+    question: "Is coaching with Rdwan entirely online?",
     answer:
-      "Lorem ipsum dolor sit amet consectetur. Velit gravida malesuada quis ullamcorper. Lectus accumsan turpis quisque tempor nisi. Eget morbi vitae neque adipiscing ridiculus feugiat. Lectus ac eleifend iaculis magna.",
+      "Yes. Coaching is delivered online, with a personalized training program based on your goals and experience, along with ongoing guidance to help you stay consistent and progress.",
   },
   {
-    id: "weight-loss-routine",
-    question: "What’s the best workout routine for weight loss?",
+    id: "beginners",
+    question: "Can I join if I'm a complete beginner?",
     answer:
-      "A combination of progressive resistance training 3 to 4 days per week with moderate-intensity cardiovascular exercise is the most effective approach for fat loss. Consistency, proper form, and maintaining a sustainable caloric deficit are key to long-term success.",
+      "Absolutely. Your program is tailored to your current fitness level and experience, whether you're just starting out or have been training for years.",
   },
   {
-    id: "workout-nutrition",
-    question: "What should I eat before and after a workout?",
+    id: "training-goals",
+    question: "What goals can I work toward with this coaching?",
     answer:
-      "Prior to training, consume easily digestible carbohydrates paired with a moderate amount of protein roughly 1 to 2 hours in advance. Post-workout, focus on quality protein to support muscle repair and complex carbohydrates to replenish depleted glycogen stores.",
+      "You can focus on building strength, gaining muscle, losing fat, or improving overall fitness, with a program tailored to your specific goals and needs.",
   },
   {
-    id: "build-muscle",
-    question: "How can I build muscle effectively?",
+    id: "powerlifting",
+    question: "Do you offer specialized powerlifting programs?",
     answer:
-      "Building muscle requires consistent progressive overload across your workouts, adequate training volume targeting major muscle groups 2 to 3 times per week, sufficient dietary protein (1.6 to 2.2 grams per kilogram of body weight), and prioritized rest.",
+      "Yes. Specialized powerlifting programs are available to help develop strength and improve your squat, bench press, and deadlift performance based on your current level and training needs.",
+  },
+  {
+    id: "calories-nutrition",
+    question: "Does coaching include calorie and nutrition guidance?",
+    answer:
+      "Yes. Your calorie requirements and macronutrient targets are calculated according to your goals, whether you're aiming to build muscle, lose fat, or improve performance.",
+  },
+  {
+    id: "exercise-technique",
+    question: "How is my exercise technique reviewed and corrected?",
+    answer:
+      "You can submit videos of your exercises for review. Rdwan will provide feedback and guidance to help you improve your technique and train more safely and effectively.",
+  },
+  {
+    id: "support-communication",
+    question: "Can I contact Rdwan if I have questions or difficulties during training?",
+    answer:
+      "Yes. You can reach out via WhatsApp for coaching support, questions about your training program, and guidance when you encounter challenges along the way.",
+  },
+  {
+    id: "student-discount",
+    question: "Is there a discount available for students?",
+    answer:
+      "Yes. Students are eligible for a 25% discount on coaching services, subject to verification of student status.",
   },
 ];
 
@@ -72,17 +95,22 @@ function AccordionToggleIcon({ isOpen, className = "" }) {
 
 /**
  * FAQ Accordion Section (Figma Frame 32 - node 1:1418: 959x566px)
- * Heading: "COMMONLY ASKED QUESTIONS" (Figma node 1:1420)
- * Subtitle: "I am here to help!" (Figma node 1:1421)
- * Items: 4 Accordion rows with bottom dividers (Figma nodes 1:1423, 1:1430, 1:1436, 1:1442)
+ * Heading: "COMMONLY ASKED QUESTIONS" / "الأسئلة الشائعة"
+ * Subtitle: "I am here to help!" / "أنا هنا لمساعدتك!"
+ * Items: 8 Accordion rows with bottom dividers
  * Default state: First item expanded, matching Figma design.
  */
 export default function FAQSection({
   className = "",
-  items = DEFAULT_FAQS,
+  items,
   defaultOpenIndex = 0,
 }) {
+  const { t } = useLocale();
   const [openIndex, setOpenIndex] = useState(defaultOpenIndex);
+
+  const faqItems = items || t?.faq?.items || DEFAULT_FAQS;
+  const heading = t?.faq?.heading || "Commonly Asked Questions";
+  const subtitle = t?.faq?.subtitle || "I am here to help!";
 
   const toggleItem = (index) => {
     setOpenIndex((prev) => (prev === index ? -1 : index));
@@ -108,10 +136,10 @@ export default function FAQSection({
               id="faq-heading"
               className="section-heading text-3xl sm:text-4xl lg:text-[40px] desktop:text-[48px] font-extrabold uppercase font-display tracking-tight text-foreground"
             >
-              Commonly Asked Questions
+              {heading}
             </h2>
             <p className="mt-2 sm:mt-3 font-sans text-base sm:text-lg lg:text-[20px] desktop:text-[22px] font-normal text-muted">
-              I am here to help!
+              {subtitle}
             </p>
           </div>
 
@@ -120,7 +148,7 @@ export default function FAQSection({
             className="mt-8 sm:mt-12 lg:mt-[52px] w-full"
             role="presentation"
           >
-            {items.map((item, idx) => {
+            {faqItems.map((item, idx) => {
               const isOpen = openIndex === idx;
               const questionId = `faq-question-${item.id || idx}`;
               const answerId = `faq-answer-${item.id || idx}`;
@@ -137,7 +165,7 @@ export default function FAQSection({
                       aria-expanded={isOpen}
                       aria-controls={answerId}
                       onClick={() => toggleItem(idx)}
-                      className="group w-full py-6 sm:py-7 lg:py-[30px] px-2 sm:px-4 lg:px-[30px] flex items-center justify-between text-left gap-4 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 transition-colors cursor-pointer"
+                      className="group w-full py-6 sm:py-7 lg:py-[30px] px-2 sm:px-4 lg:px-[30px] flex items-center justify-between text-start gap-4 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 transition-colors cursor-pointer"
                     >
                       <span className="font-display font-bold text-lg sm:text-xl lg:text-[20px] tracking-tight text-foreground group-hover:text-foreground/90 transition-colors">
                         {item.question}
@@ -162,7 +190,7 @@ export default function FAQSection({
                   >
                     <div className="overflow-hidden">
                       <div className="px-2 sm:px-4 lg:px-[30px] pb-6 sm:pb-7 lg:pb-[30px] -mt-1 sm:-mt-1.5 lg:-mt-2">
-                        <p className="font-sans text-sm sm:text-base leading-relaxed text-muted max-w-[834px]">
+                        <p className="font-sans text-sm sm:text-base leading-relaxed text-muted max-w-[834px] text-start">
                           {item.answer}
                         </p>
                       </div>
