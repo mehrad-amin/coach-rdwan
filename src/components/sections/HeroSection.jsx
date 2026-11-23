@@ -62,7 +62,7 @@ export default function HeroSection() {
         {/* Layer 3: Giant brand watermark */}
         <p
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-[34px] z-[5] select-none whitespace-nowrap bg-gradient-to-t from-white from-[25.833%] to-transparent to-[81.439%] bg-clip-text text-center font-display text-[clamp(4.75rem,21vw,7.25rem)] font-extrabold uppercase leading-[1.2] tracking-[-0.01em] text-transparent opacity-30 sm:bottom-[54px] rtl:text-[clamp(6rem,28.5vw,8.5rem)] rtl:opacity-[0.45] lg:inset-x-auto lg:bottom-auto lg:start-[2px] lg:top-[580px] lg:text-start lg:text-[clamp(4.5rem,15.27vw,13.75rem)] lg:rtl:text-[clamp(4.5rem,15.27vw,13.75rem)] lg:rtl:opacity-30 xl:top-[640px] desktop:top-[740px] desktop:tracking-[-2.2px] rtl:tracking-normal"
+          className="pointer-events-none absolute inset-x-0 bottom-[34px] z-[5] select-none whitespace-nowrap bg-gradient-to-t from-white from-[25.833%] to-transparent to-[81.439%] bg-clip-text text-center font-display text-[clamp(4.75rem,21vw,7.25rem)] font-extrabold uppercase leading-[1.2] tracking-[-0.01em] text-transparent opacity-30 sm:bottom-[54px] rtl:bottom-[38px] rtl:text-[clamp(4.5rem,21vw,6.75rem)] rtl:from-[18%] rtl:to-[95%] rtl:opacity-[0.45] sm:rtl:bottom-[54px] lg:inset-x-auto lg:bottom-auto lg:start-[2px] lg:top-[580px] lg:text-start lg:text-[clamp(4.5rem,15.27vw,13.75rem)] lg:rtl:text-[clamp(4.5rem,15.27vw,13.75rem)] lg:rtl:opacity-30 xl:top-[640px] desktop:top-[740px] desktop:tracking-[-2.2px] rtl:tracking-normal"
         >
           {t.hero.watermarkText}
         </p>

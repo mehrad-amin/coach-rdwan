@@ -41,7 +41,7 @@ export default function Qualifications({ className = "" }) {
 
           {/* 2. Coach Photograph (Mobile 2nd / Desktop Right Column spanning both rows) */}
           <div className="mx-auto w-full max-w-[340px] sm:max-w-[380px] ltr:lg:col-start-2 rtl:lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:mx-0 lg:w-[375px] lg:max-w-none lg:self-center desktop:w-[396px]">
-            <div className="group relative aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-media)] border border-white/10 bg-[#141414] shadow-[var(--shadow-card)]">
+            <div className="group relative aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-media)] bg-[#141414] shadow-[var(--shadow-card)]">
               <Image
                 src="/images/rdwan/rdwan-3.jpg"
                 alt={imageAlt}
@@ -53,7 +53,7 @@ export default function Qualifications({ className = "" }) {
               />
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10"
+                className="pointer-events-none absolute inset-0 rounded-[var(--radius-media)] border border-white/10 bg-gradient-to-t from-black/40 via-transparent to-black/10"
               />
             </div>
           </div>
