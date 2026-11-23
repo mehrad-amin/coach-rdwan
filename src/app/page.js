@@ -3,8 +3,8 @@ import HeroSection from "@/components/sections/HeroSection";
 import PartnerLogos from "@/components/sections/PartnerLogos";
 import AboutCoach from "@/components/sections/AboutCoach";
 import Qualifications from "@/components/sections/Qualifications";
+import AthleteResults from "@/components/sections/AthleteResults";
 import TrainingPrograms from "@/components/sections/TrainingPrograms";
-import FitnessCalculator from "@/components/sections/FitnessCalculator";
 import Testimonials from "@/components/sections/Testimonials";
 import FAQSection from "@/components/sections/FAQSection";
 import BottomCTA from "@/components/sections/BottomCTA";
@@ -19,8 +19,9 @@ export default function Home() {
         <PartnerLogos />
         <AboutCoach />
         <Qualifications />
+        {/* Athlete Results / Competition Achievements Section */}
+        <AthleteResults />
         <TrainingPrograms />
-        <FitnessCalculator />
         <Testimonials />
         <FAQSection />
         <BottomCTA />

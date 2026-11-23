@@ -15,7 +15,7 @@ export const HERO_MEDIA = {
     height: 2731,
   },
   coachCutout: {
-    src: "/images/rdwan/rdwan-hero-1.webp",
+    src: "/images/rdwan/rdwan-hero-2.webp",
     width: 1800,
     height: 2400,
   },

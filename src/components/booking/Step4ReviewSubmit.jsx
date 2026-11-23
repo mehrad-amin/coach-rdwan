@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "@/i18n/LocaleProvider";
-import { getPlanById, calculateStudentDiscountPrice } from "@/data/pricing";
+import { getProgramById, getExactPrice } from "@/data/pricing";
 
 export default function Step4ReviewSubmit({
   data,
@@ -10,51 +10,42 @@ export default function Step4ReviewSubmit({
   errors,
   isSubmitting,
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const step4 = t?.booking?.step4 || {};
-  const fields = step4.fields || {};
   const sections = step4.sections || {};
-  const goals = t?.booking?.step2?.goals || {};
-  const experiences = t?.booking?.step2?.experiences || {};
-  const locations = t?.booking?.step3?.locations || {};
-  const genders = t?.booking?.step1?.genders || {};
+  const fields = step4.fields || {};
+  const pricing = t?.pricing || {};
 
-  const goalTitle = goals[data.goal]?.title || data.goal;
-  const experienceTitle = experiences[data.experience]?.title || data.experience;
-  const locationTitle = locations[data.trainingLocation]?.title || data.trainingLocation;
-  
-  const plan = getPlanById(data.package);
-  const planInfo = t?.pricing?.plans?.[plan.id] || {};
-  const planTitle = planInfo.name || plan.id;
-  const currency = t?.pricing?.currency || "SAR";
-  const period = t?.pricing?.period || "/month";
-  const studentDiscountPrice = calculateStudentDiscountPrice(plan.priceAmount);
+  const programId = data.program || "powerlifting";
+  const durationId = data.duration || "1_month";
+  const isStudent = data.student === "yes";
+  const approvedPrice = getExactPrice(programId, durationId, isStudent);
 
-  const genderLabel =
-    data.gender === "Male"
-      ? genders.male || "Male"
-      : data.gender === "Female"
-      ? genders.female || "Female"
-      : genders.other || data.gender;
+  const programInfo = pricing.programs?.[programId] || {};
+  const durationLabel = pricing.durationLabels?.[durationId] || durationId;
+
+  const isPowerlifting = programId === "powerlifting";
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
+      {/* Step Header */}
       <div>
         <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight text-foreground">
           {step4.title || "Step 4: Review & Confirm"}
         </h3>
-        <p className="mt-1 text-sm text-muted font-sans">
-          {step4.subtitle || "Review your information below before submitting your coaching application."}
+        <p className="mt-1 text-xs sm:text-sm text-muted font-sans leading-relaxed">
+          {step4.subtitle ||
+            "Verify your application details before submitting to Coach Rdwan."}
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* 1. Personal Information */}
-        <div className="rounded-xl border-[1.5px] border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
+        {/* 1. Basic Athlete Information */}
+        <div className="rounded-2xl border border-white/10 bg-[#141414] p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
-              <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
-                {sections.personal || "Personal Information"}
+              <h4 className="font-display font-bold text-xs uppercase tracking-wider text-brand">
+                {sections.personal || "Basic Athlete Information"}
               </h4>
               <button
                 type="button"
@@ -64,35 +55,45 @@ export default function Step4ReviewSubmit({
                 {step4.edit || "Edit"}
               </button>
             </div>
-            <dl className="space-y-1.5 text-xs sm:text-sm">
-              <div className="flex justify-between">
+            <dl className="space-y-2 text-xs sm:text-sm font-sans">
+              <div className="flex justify-between items-center">
                 <dt className="text-muted">{fields.fullName || "Full Name:"}</dt>
-                <dd className="font-medium text-foreground">{data.fullName}</dd>
+                <dd className="font-semibold text-foreground">{data.fullName}</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{fields.email || "Email:"}</dt>
-                <dd className="font-medium text-foreground truncate max-w-[190px]">{data.email}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{fields.phone || "Phone:"}</dt>
-                <dd className="font-medium text-foreground" dir="ltr">{data.phone}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{fields.ageGender || "Age / Gender:"}</dt>
-                <dd className="font-medium text-foreground">
-                  {data.age} {fields.years || "yrs"} • {genderLabel}
+              <div className="flex justify-between items-center">
+                <dt className="text-muted">{fields.phone || "WhatsApp:"}</dt>
+                <dd className="font-medium text-foreground" dir="ltr">
+                  {data.phone}
                 </dd>
+              </div>
+              <div className="flex justify-between items-center">
+                <dt className="text-muted">{fields.email || "Email:"}</dt>
+                <dd className="font-medium text-foreground truncate max-w-[180px]" dir="ltr">
+                  {data.email}
+                </dd>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                <dt className="text-muted">{fields.age || "Age:"}</dt>
+                <dd className="font-medium text-foreground">{data.age}</dd>
+              </div>
+              <div className="flex justify-between items-center">
+                <dt className="text-muted">{fields.height || "Height:"}</dt>
+                <dd className="font-medium text-foreground">{data.height} cm</dd>
+              </div>
+              <div className="flex justify-between items-center">
+                <dt className="text-muted">{fields.currentWeight || "Current Weight:"}</dt>
+                <dd className="font-medium text-foreground">{data.currentWeight} kg</dd>
               </div>
             </dl>
           </div>
         </div>
 
-        {/* 2. Fitness Profile */}
-        <div className="rounded-xl border-[1.5px] border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
+        {/* 2. Program & Subscription */}
+        <div className="rounded-2xl border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_8%,#141414)] p-5 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
-              <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
-                {sections.fitness || "Fitness Profile"}
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-brand/25">
+              <h4 className="font-display font-bold text-xs uppercase tracking-wider text-brand">
+                {sections.subscription || "Program & Subscription"}
               </h4>
               <button
                 type="button"
@@ -102,118 +103,239 @@ export default function Step4ReviewSubmit({
                 {step4.edit || "Edit"}
               </button>
             </div>
-            <dl className="space-y-1.5 text-xs sm:text-sm">
+            <dl className="space-y-2.5 text-xs sm:text-sm font-sans">
+              <div className="flex justify-between items-center">
+                <dt className="text-muted">{fields.program || "Selected Program:"}</dt>
+                <dd className="font-display font-bold text-base text-foreground">
+                  {programInfo.name || programId}
+                </dd>
+              </div>
+              <div className="flex justify-between items-center">
+                <dt className="text-muted">{fields.duration || "Duration:"}</dt>
+                <dd className="font-semibold text-foreground">{durationLabel}</dd>
+              </div>
+              <div className="flex justify-between items-center">
+                <dt className="text-muted">{fields.studentStatus || "Student:"}</dt>
+                <dd className="font-medium">
+                  {isStudent ? (
+                    <span className="text-brand font-bold">
+                      {locale === "ar" ? "نعم (خصم 20%)" : "Yes (20% Discount)"}
+                    </span>
+                  ) : (
+                    <span className="text-muted">
+                      {locale === "ar" ? "لا" : "No"}
+                    </span>
+                  )}
+                </dd>
+              </div>
+              <div className="pt-2.5 border-t border-brand/20 flex justify-between items-baseline">
+                <dt className="font-sans text-xs text-muted">
+                  {fields.price || "Approved Price:"}
+                </dt>
+                <dd className="font-display font-extrabold text-2xl text-brand" dir="ltr">
+                  {approvedPrice} {pricing.currency}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        {/* 3. Program-Specific Questionnaire Answers (Active Track Only) */}
+        <div className="md:col-span-2 rounded-2xl border border-white/10 bg-[#141414] p-5 space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+            <h4 className="font-display font-bold text-xs uppercase tracking-wider text-brand">
+              {sections.questionnaire || "Specialized Questionnaire Answers"}
+            </h4>
+            <button
+              type="button"
+              onClick={() => goToStep(3)}
+              className="text-xs font-sans font-semibold text-brand hover:underline cursor-pointer"
+            >
+              {step4.edit || "Edit"}
+            </button>
+          </div>
+
+          {isPowerlifting ? (
+            /* Powerlifting Answers */
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-sans">
               <div className="flex justify-between">
-                <dt className="text-muted">{fields.height || "Height:"}</dt>
-                <dd className="font-medium text-foreground">{data.height} cm</dd>
+                <span className="text-muted">Squat:</span>
+                <span className="font-medium text-foreground">
+                  {data.plSquatWeight ? `${data.plSquatWeight} kg` : "—"}{" "}
+                  {data.plSquatTechnique ? `(${data.plSquatTechnique})` : ""}
+                </span>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">{fields.currentWeight || "Current Weight:"}</dt>
-                <dd className="font-medium text-foreground">{data.currentWeight} kg</dd>
+                <span className="text-muted">Bench Press:</span>
+                <span className="font-medium text-foreground">
+                  {data.plBenchWeight ? `${data.plBenchWeight} kg` : "—"}{" "}
+                  {data.plFingerPlacement ? `(${data.plFingerPlacement})` : ""}
+                </span>
               </div>
-              {data.targetWeight && (
+              <div className="flex justify-between">
+                <span className="text-muted">Deadlift:</span>
+                <span className="font-medium text-foreground">
+                  {data.plDeadliftWeight ? `${data.plDeadliftWeight} kg` : "—"}{" "}
+                  {data.plDeadliftTechnique ? `(${data.plDeadliftTechnique})` : ""}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">RPE Knowledge:</span>
+                <span className="font-medium text-foreground">
+                  {data.plRpeKnowledge === "yes"
+                    ? locale === "ar"
+                      ? "أعرف"
+                      : "Yes, I know it"
+                    : locale === "ar"
+                    ? "ما أعرف"
+                    : "No, I don't"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Training Days:</span>
+                <span className="font-medium text-foreground">
+                  {data.plDays} {locale === "ar" ? "أيام / أسبوع" : "Days/Week"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Worked with Coach:</span>
+                <span className="font-medium text-foreground">
+                  {data.plPreviousCoach === "yes"
+                    ? locale === "ar"
+                      ? "أيوة"
+                      : "Yes"
+                    : locale === "ar"
+                    ? "لا"
+                    : "No"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Calculates Calories:</span>
+                <span className="font-medium text-foreground">
+                  {data.plCalorieKnowledge === "yes"
+                    ? locale === "ar"
+                      ? "أيوة"
+                      : "Yes"
+                    : locale === "ar"
+                    ? "لا"
+                    : "No"}
+                </span>
+              </div>
+              {data.plCompetition && (
                 <div className="flex justify-between">
-                  <dt className="text-muted">{fields.targetWeight || "Target Weight:"}</dt>
-                  <dd className="font-medium text-brand">{data.targetWeight} kg</dd>
+                  <span className="text-muted">Championship Experience:</span>
+                  <span className="font-medium text-foreground">
+                    {data.plCompetition === "yes"
+                      ? locale === "ar"
+                        ? "أيوة"
+                        : "Yes"
+                      : locale === "ar"
+                      ? "لا"
+                      : "No"}
+                  </span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <dt className="text-muted">{fields.goal || "Primary Goal:"}</dt>
-                <dd className="font-medium text-foreground">
-                  {goalTitle}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{fields.experience || "Experience:"}</dt>
-                <dd className="font-medium text-foreground">
-                  {experienceTitle}
-                </dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        {/* 3. Training & Logistics */}
-        <div className="rounded-xl border-[1.5px] border-white/10 bg-[#141414] p-4 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
-              <h4 className="font-display font-bold text-sm uppercase text-foreground tracking-wide">
-                {sections.training || "Training & Schedule"}
-              </h4>
-              <button
-                type="button"
-                onClick={() => goToStep(3)}
-                className="text-xs font-sans font-semibold text-brand hover:underline cursor-pointer"
-              >
-                {step4.edit || "Edit"}
-              </button>
-            </div>
-            <dl className="space-y-1.5 text-xs sm:text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted">{fields.location || "Location:"}</dt>
-                <dd className="font-medium text-foreground">
-                  {locationTitle}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{fields.frequency || "Frequency:"}</dt>
-                <dd className="font-medium text-foreground">
-                  {data.daysPerWeek} {fields.daysPerWeek || "days per week"}
-                </dd>
-              </div>
-              {data.notes && (
-                <div className="pt-2 border-t border-white/5 mt-2">
-                  <dt className="text-xs text-muted mb-0.5">{fields.notes || "Notes / Limitations:"}</dt>
-                  <dd className="text-xs text-foreground/80 italic line-clamp-2">
-                    &ldquo;{data.notes}&rdquo;
-                  </dd>
+              {data.plWhyRdwan && (
+                <div className="sm:col-span-2 pt-2 border-t border-white/5">
+                  <span className="text-xs text-muted block mb-1">
+                    {locale === "ar" ? "سبب اختيار الكوتش:" : "Reason for Choosing Coach:"}
+                  </span>
+                  <p className="text-xs text-foreground/90 italic">
+                    &ldquo;{data.plWhyRdwan}&rdquo;
+                  </p>
                 </div>
               )}
-            </dl>
-          </div>
-        </div>
+            </div>
+          ) : (
+            /* Bodybuilding Answers */
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-sans">
+              <div className="flex justify-between">
+                <span className="text-muted">Goal:</span>
+                <span className="font-semibold text-brand">
+                  {data.bbGoal === "fat_loss"
+                    ? locale === "ar"
+                      ? "خسارة دهون"
+                      : "Fat Loss"
+                    : locale === "ar"
+                    ? "بناء كتلة عضلية"
+                    : "Building Muscle Mass"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Training Days:</span>
+                <span className="font-medium text-foreground">
+                  {data.bbDays} {locale === "ar" ? "أيام / أسبوع" : "Days/Week"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Activity Level:</span>
+                <span className="font-medium text-foreground">
+                  {data.bbActivityLevel || "—"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Worked with Coach:</span>
+                <span className="font-medium text-foreground">
+                  {data.bbPreviousCoach === "yes"
+                    ? locale === "ar"
+                      ? "أيوة"
+                      : "Yes"
+                    : locale === "ar"
+                    ? "لا"
+                    : "No"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Calculates Calories:</span>
+                <span className="font-medium text-foreground">
+                  {data.bbCalorieKnowledge === "yes"
+                    ? locale === "ar"
+                      ? "أيوة"
+                      : "Yes"
+                    : locale === "ar"
+                    ? "لا"
+                    : "No"}
+                </span>
+              </div>
+              {data.bbWhyRdwan && (
+                <div className="sm:col-span-2 pt-2 border-t border-white/5">
+                  <span className="text-xs text-muted block mb-1">
+                    {locale === "ar" ? "سبب اختيار الكوتش:" : "Reason for Choosing Coach:"}
+                  </span>
+                  <p className="text-xs text-foreground/90 italic">
+                    &ldquo;{data.bbWhyRdwan}&rdquo;
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
-        {/* 4. Selected Package */}
-        <div className="rounded-xl border-selected-brand bg-[color-mix(in_srgb,var(--brand-red)_6%,#141414)] p-4 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-brand/30">
-              <h4 className="font-display font-bold text-sm uppercase text-brand tracking-wide">
-                {sections.package || "Selected Package"}
-              </h4>
-              <button
-                type="button"
-                onClick={() => goToStep(3)}
-                className="text-xs font-sans font-semibold text-brand hover:underline cursor-pointer"
-              >
-                {step4.edit || "Edit"}
-              </button>
+          {/* Additional details: Instagram & Notes */}
+          {(data.instagram || data.additionalNotes) && (
+            <div className="pt-2 border-t border-white/10 space-y-2 text-xs font-sans">
+              {data.instagram && (
+                <div className="flex justify-between">
+                  <span className="text-muted">Instagram:</span>
+                  <span className="font-mono text-foreground" dir="ltr">
+                    {data.instagram}
+                  </span>
+                </div>
+              )}
+              {data.additionalNotes && (
+                <div>
+                  <span className="text-muted block mb-0.5">
+                    {locale === "ar" ? "ملاحظات إضافية:" : "Additional Notes:"}
+                  </span>
+                  <p className="text-foreground/80 italic">&ldquo;{data.additionalNotes}&rdquo;</p>
+                </div>
+              )}
             </div>
-            <div className="space-y-2">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="font-display font-bold text-base text-foreground">
-                  {planTitle}
-                </span>
-                <span className="font-display font-extrabold text-lg text-brand whitespace-nowrap">
-                  {plan.priceAmount} {currency}{" "}
-                  <span className="text-xs font-sans text-muted">{period}</span>
-                </span>
-              </div>
-              <p className="text-xs text-muted leading-relaxed font-sans">
-                {planInfo.description}
-              </p>
-              <div className="mt-2 pt-2 border-t border-brand/20 flex items-center justify-between text-xs text-muted font-sans">
-                <span>{t?.pricing?.studentDiscount || "25% Student Discount"}:</span>
-                <span className="font-medium text-foreground/80">
-                  ~{studentDiscountPrice} {currency} {period}
-                </span>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
       {/* Required Consent Checkbox */}
-      <div className="rounded-xl bg-[#141414] border-[1.5px] border-white/10 p-4">
+      <div className="rounded-2xl bg-[#141414] border border-white/10 p-5">
         <label className="flex items-start gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -225,42 +347,13 @@ export default function Step4ReviewSubmit({
           />
           <span className="text-xs sm:text-sm text-foreground/90 font-sans leading-relaxed">
             {step4.consentText ||
-              "I confirm that the information provided is accurate and agree to have it used for this demo booking experience."}{" "}
-            <span className="text-brand font-medium">*</span>
+              "I confirm that all entered information is accurate and agree to begin coaching with Coach Rdwan."}{" "}
+            <span className="text-brand font-bold">*</span>
           </span>
         </label>
         {errors.consent && (
-          <p className="mt-2 text-xs text-red-400 font-medium">
-            {errors.consent}
-          </p>
+          <p className="mt-2 text-xs text-red-400 font-medium">{errors.consent}</p>
         )}
-      </div>
-
-      {/* Honest Demo Disclaimer */}
-      <div className="rounded-xl border-[1.5px] border-white/10 bg-white/[0.02] p-3 text-center">
-        <p className="inline-flex items-center justify-center gap-1.5 text-xs text-muted font-sans">
-          <svg
-            className="w-3.5 h-3.5 shrink-0 text-brand inline-block"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-            />
-          </svg>
-          <span>
-            <span className="font-medium text-foreground/80">
-              {step4.demoNoticeTag || "Demo Notice:"}
-            </span>{" "}
-            {step4.demoNoticeText ||
-              "This is an interactive portfolio prototype. No personal data is stored in databases or transmitted to third-party services."}
-          </span>
-        </p>
       </div>
     </div>
   );

@@ -41,14 +41,19 @@ export default function Qualifications({ className = "" }) {
 
           {/* 2. Coach Photograph (Mobile 2nd / Desktop Right Column spanning both rows) */}
           <div className="mx-auto w-full max-w-[340px] sm:max-w-[380px] ltr:lg:col-start-2 rtl:lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:mx-0 lg:w-[375px] lg:max-w-none lg:self-center desktop:w-[396px]">
-            <div className="group relative aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-media)] shadow-[var(--shadow-card)]">
+            <div className="group relative aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-media)] border border-white/10 bg-[#141414] shadow-[var(--shadow-card)]">
               <Image
-                src="/images/rdwan/rdwan-cinematic.jpg"
+                src="/images/rdwan/rdwan-3.jpg"
                 alt={imageAlt}
-                width={1920}
-                height={2560}
+                fill
+                priority
                 sizes="(max-width: 640px) 92vw, (max-width: 1024px) 380px, 396px"
-                className="block h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                style={{ objectPosition: "50% 50%" }}
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10"
               />
             </div>
           </div>

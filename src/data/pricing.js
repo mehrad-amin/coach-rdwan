@@ -1,57 +1,78 @@
 /**
- * Centralized coaching plans and proposed Saudi-market pricing (SAR).
+ * Centralized coaching programs and approved Saudi-market pricing (SAR) for Coach Rdwan.
  *
- * NOTE: These pricing values (199 / 349 / 499 SAR/month) and tier structures
- * are proposed prototype values pending Coach Rdwan's final approval before launch.
- * Single source of truth for both Pricing Plans section and Registration Form.
+ * Single source of truth for:
+ * - Pricing section
+ * - Duration selector & student discount toggle
+ * - Registration & booking form
+ * - Application payload & confirmation
  */
+
 export const PRICING_CONFIG = {
   currencyCode: "SAR",
-  studentDiscountPercent: 25,
-  defaultActiveIndex: 1, // Center featured plan (Performance Coaching)
-  plans: [
+  studentDiscountPercent: 20,
+  defaultProgramId: "powerlifting",
+  defaultDurationId: "1_month",
+  durations: [
     {
-      id: "starter-coaching",
-      priceAmount: 199,
-      featured: false,
-      href: "/booking?plan=starter-coaching",
-      badge: {
-        en: "Essential Plan",
-        ar: "الخطة الأساسية",
-      },
+      id: "1_month",
+      months: 1,
     },
     {
-      id: "performance-coaching",
-      priceAmount: 349,
+      id: "3_months",
+      months: 3,
+    },
+  ],
+  programs: [
+    {
+      id: "powerlifting",
       featured: true,
-      href: "/booking?plan=performance-coaching",
-      badge: {
-        en: "Most Popular",
-        ar: "الأكثر طلبًا",
+      pricing: {
+        "1_month": { regular: 349, student: 279 },
+        "3_months": { regular: 940, student: 790 },
       },
     },
     {
-      id: "elite-coaching",
-      priceAmount: 499,
+      id: "bodybuilding",
       featured: false,
-      href: "/booking?plan=elite-coaching",
-      badge: {
-        en: "Elite Athlete",
-        ar: "تدريب النخبة",
+      pricing: {
+        "1_month": { regular: 299, student: 239 },
+        "3_months": { regular: 809, student: 649 },
       },
     },
   ],
 };
 
-export function getPlanById(planId) {
+/**
+ * Get program configuration by ID
+ */
+export function getProgramById(programId) {
   return (
-    PRICING_CONFIG.plans.find((p) => p.id === planId) ||
-    PRICING_CONFIG.plans[PRICING_CONFIG.defaultActiveIndex]
+    PRICING_CONFIG.programs.find((p) => p.id === programId) ||
+    PRICING_CONFIG.programs[0]
   );
 }
 
-export function calculateStudentDiscountPrice(priceAmount) {
-  return Math.round(
-    priceAmount * (1 - PRICING_CONFIG.studentDiscountPercent / 100)
-  );
+/**
+ * Get exact approved price based on program, duration, and student status.
+ * Never uses generic math formulas; strictly returns the approved matrix.
+ */
+export function getExactPrice(programId, durationId = "1_month", isStudent = false) {
+  const program = getProgramById(programId);
+  const durationPricing = program.pricing[durationId] || program.pricing["1_month"];
+  return isStudent ? durationPricing.student : durationPricing.regular;
+}
+
+/**
+ * Helper to validate program IDs
+ */
+export function isValidProgramId(id) {
+  return PRICING_CONFIG.programs.some((p) => p.id === id);
+}
+
+/**
+ * Helper to validate duration IDs
+ */
+export function isValidDurationId(id) {
+  return PRICING_CONFIG.durations.some((d) => d.id === id);
 }

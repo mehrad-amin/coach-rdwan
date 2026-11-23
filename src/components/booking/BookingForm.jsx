@@ -2,159 +2,116 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { PRICING_CONFIG } from "@/data/pricing";
+import { PRICING_CONFIG, getExactPrice, isValidProgramId, isValidDurationId } from "@/data/pricing";
 import Step1PersonalInfo from "./Step1PersonalInfo";
-import Step2FitnessProfile from "./Step2FitnessProfile";
-import Step3TrainingLifestyle from "./Step3TrainingLifestyle";
+import Step2ProgramSelection from "./Step2ProgramSelection";
+import Step3ProgramQuestionnaire from "./Step3ProgramQuestionnaire";
 import Step4ReviewSubmit from "./Step4ReviewSubmit";
 import BookingSuccess from "./BookingSuccess";
 
-const DEFAULT_PACKAGE_ID =
-  PRICING_CONFIG.plans[PRICING_CONFIG.defaultActiveIndex]?.id ||
-  "performance-coaching";
-
 const INITIAL_FORM_DATA = {
+  // Step 1: Basic Athlete Information
   fullName: "",
-  email: "",
   phone: "",
+  email: "",
   age: "",
-  gender: "",
   height: "",
   currentWeight: "",
-  targetWeight: "",
-  goal: "weight_loss",
-  experience: "beginner",
-  trainingLocation: "gym",
-  daysPerWeek: 4,
-  package: DEFAULT_PACKAGE_ID,
-  notes: "",
+
+  // Step 2: Program & Subscription
+  program: PRICING_CONFIG.defaultProgramId,
+  duration: PRICING_CONFIG.defaultDurationId,
+  student: "no",
+
+  // Step 3: Track A - Powerlifting Questionnaire
+  plSquatWeight: "",
+  plSquatTechnique: "",
+  plBenchWeight: "",
+  plFingerPlacement: "",
+  plDeadliftWeight: "",
+  plDeadliftTechnique: "",
+  plRpeKnowledge: "",
+  plDays: 4,
+  plPreviousCoach: "",
+  plWhyRdwan: "",
+  plCalorieKnowledge: "",
+  plCompetition: "",
+
+  // Step 3: Track B - Bodybuilding Questionnaire
+  bbGoal: "muscle_building",
+  bbDays: 4,
+  bbActivityLevel: "",
+  bbWhyRdwan: "",
+  bbPreviousCoach: "",
+  bbCalorieKnowledge: "",
+
+  // Shared Additional Information
+  instagram: "",
+  additionalNotes: "",
+
+  // Step 4: Consent
   consent: false,
 };
 
 export default function BookingForm() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasPrefilled, setHasPrefilled] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submissionPayload, setSubmissionPayload] = useState(null);
 
   const stepTitles = t?.booking?.steps?.titles || [
-    "Personal Info",
-    "Fitness Profile",
-    "Training & Lifestyle",
+    "Basic Athlete Info",
+    "Program & Plan",
+    "Specialized Questionnaire",
     "Review & Confirm",
   ];
 
-  // Safely prefill package selection and scientific calculator data on client mount
+  // Initialize selected program, duration, and student discount from URL query or sessionStorage
   useEffect(() => {
     const handle = requestAnimationFrame(() => {
       try {
         if (typeof window === "undefined") return;
 
-        // 1. Resolve selected plan from URL query (?plan=... or ?package=...) or sessionStorage
         const urlParams = new URLSearchParams(window.location.search);
-        const queryPlan = urlParams.get("plan") || urlParams.get("package");
-        const storedPlan = sessionStorage.getItem("pt_selected_plan");
-        const validPlanIds = PRICING_CONFIG.plans.map((p) => p.id);
+        const queryProgram = urlParams.get("program") || urlParams.get("plan");
+        const queryDuration = urlParams.get("duration");
+        const queryStudent = urlParams.get("student");
 
-        let resolvedPlan = null;
-        if (queryPlan && validPlanIds.includes(queryPlan)) {
-          resolvedPlan = queryPlan;
-          try {
-            sessionStorage.setItem("pt_selected_plan", queryPlan);
-          } catch {}
-        } else if (storedPlan && validPlanIds.includes(storedPlan)) {
-          resolvedPlan = storedPlan;
-        }
-
-        // 2. Read scientific calculator data
-        const raw = sessionStorage.getItem("pt_fitness_calculator_v1");
-        const parsed = raw ? JSON.parse(raw) : null;
+        const storedProgram = sessionStorage.getItem("pt_selected_program");
+        const storedDuration = sessionStorage.getItem("pt_selected_duration");
+        const storedStudent = sessionStorage.getItem("pt_is_student");
 
         setFormData((prev) => {
           const next = { ...prev };
-          let appliedCalc = false;
 
-          // Apply resolved package if found
-          if (resolvedPlan) {
-            next.package = resolvedPlan;
+          // Program
+          if (queryProgram && isValidProgramId(queryProgram)) {
+            next.program = queryProgram;
+          } else if (storedProgram && isValidProgramId(storedProgram)) {
+            next.program = storedProgram;
           }
 
-          if (parsed && parsed.inputs) {
-            // Biological sex -> Gender (if not already entered)
-            if (!next.gender && parsed.inputs.sex) {
-              next.gender = parsed.inputs.sex === "female" ? "Female" : "Male";
-              appliedCalc = true;
-            }
-
-            // Age (if not already entered)
-            if (!next.age && parsed.inputs.age) {
-              next.age = String(parsed.inputs.age);
-              appliedCalc = true;
-            }
-
-            // Height (if not already entered)
-            if (!next.height && parsed.inputs.height) {
-              next.height = String(parsed.inputs.height);
-              appliedCalc = true;
-            }
-
-            // Weight (if not already entered)
-            if (!next.currentWeight && parsed.inputs.weight) {
-              next.currentWeight = String(parsed.inputs.weight);
-              appliedCalc = true;
-            }
-
-            // Goal mapping
-            if (parsed.inputs.goalId) {
-              if (parsed.inputs.goalId === "fat_loss") {
-                next.goal = "weight_loss";
-                appliedCalc = true;
-              } else if (parsed.inputs.goalId === "muscle_building") {
-                next.goal = "muscle_building";
-                appliedCalc = true;
-              } else if (parsed.inputs.goalId === "maintenance") {
-                next.goal = "general_fitness";
-                appliedCalc = true;
-              }
-            }
-
-            // Coach notes prefill with scientific calculator targets
-            if (!next.notes && parsed.results) {
-              const {
-                targetCalories,
-                protein,
-                fat,
-                carbs,
-                bmr,
-                tdee,
-                bmi,
-                sourceTag,
-                isCalibrated,
-                activityTitle,
-                goalTitle,
-              } = parsed.results;
-              const tag = sourceTag || (isCalibrated ? "Calibrated Tracking" : "Scientific Baseline");
-              const meta = [
-                activityTitle ? `Activity: ${activityTitle}` : null,
-                goalTitle ? `Goal: ${goalTitle}` : null,
-              ]
-                .filter(Boolean)
-                .join(" | ");
-              next.notes = `[${tag}] Target: ${Number(targetCalories).toLocaleString()} kcal/day | Protein: ${protein}g | Carbs: ${carbs}g | Fat: ${fat}g | BMR: ${bmr} kcal | TDEE: ${tdee} kcal | BMI: ${bmi}${meta ? ` | ${meta}` : ""}`;
-              appliedCalc = true;
-            }
+          // Duration
+          if (queryDuration && isValidDurationId(queryDuration)) {
+            next.duration = queryDuration;
+          } else if (storedDuration && isValidDurationId(storedDuration)) {
+            next.duration = storedDuration;
           }
 
-          if (appliedCalc) {
-            setHasPrefilled(true);
+          // Student
+          if (queryStudent === "yes" || queryStudent === "true") {
+            next.student = "yes";
+          } else if (storedStudent === "yes" || storedStudent === "true") {
+            next.student = "yes";
           }
 
           return next;
         });
       } catch {
-        // Ignore JSON or storage exceptions
+        // Ignore storage exceptions
       }
     });
 
@@ -162,13 +119,12 @@ export default function BookingForm() {
   }, []);
 
   const updateData = (fields) => {
-    if (fields.package) {
-      try {
-        sessionStorage.setItem("pt_selected_plan", fields.package);
-      } catch {}
-    }
     setFormData((prev) => ({ ...prev, ...fields }));
-    // Clear field errors as user updates
+    if (submitError) {
+      setSubmitError(null);
+    }
+
+    // Clear related field errors as user updates
     const fieldKeys = Object.keys(fields);
     if (fieldKeys.length > 0) {
       setErrors((prev) => {
@@ -184,58 +140,116 @@ export default function BookingForm() {
     const val = t?.booking?.validation || {};
 
     if (step === 1) {
+      // 1. Full Name
       if (!formData.fullName || formData.fullName.trim().length < 2) {
-        newErrors.fullName = val.fullName || "Please enter your full name (minimum 2 characters).";
+        newErrors.fullName =
+          val.fullName || "Please enter your full name (minimum 2 characters).";
       }
+
+      // 2. WhatsApp Phone Number
+      const phoneDigits = (formData.phone || "").replace(/\D/g, "");
+      if (!formData.phone || phoneDigits.length < 8) {
+        newErrors.phone =
+          val.phone || "Please enter a valid WhatsApp phone number (min 8 digits).";
+      }
+
+      // 3. Email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!formData.email || !emailRegex.test(formData.email.trim())) {
         newErrors.email = val.email || "Please enter a valid email address.";
       }
-      const phoneDigits = (formData.phone || "").replace(/\D/g, "");
-      if (!formData.phone || phoneDigits.length < 8) {
-        newErrors.phone = val.phone || "Please enter a valid phone or WhatsApp number (min 8 digits).";
-      }
+
+      // 4. Age
       const ageNum = parseInt(formData.age, 10);
       if (!formData.age || isNaN(ageNum) || ageNum < 16 || ageNum > 85) {
         newErrors.age = val.age || "Please enter an age between 16 and 85.";
       }
-      if (!formData.gender) {
-        newErrors.gender = val.gender || "Please select your gender.";
-      }
-    } else if (step === 2) {
+
+      // 5. Height
       const heightNum = parseFloat(formData.height);
       if (!formData.height || isNaN(heightNum) || heightNum < 120 || heightNum > 230) {
-        newErrors.height = val.height || "Please enter a realistic height between 120 and 230 cm.";
+        newErrors.height =
+          val.height || "Please enter a realistic height between 120 and 230 cm.";
       }
+
+      // 6. Current Weight
       const weightNum = parseFloat(formData.currentWeight);
-      if (!formData.currentWeight || isNaN(weightNum) || weightNum < 35 || weightNum > 250) {
-        newErrors.currentWeight = val.currentWeight || "Please enter your current weight between 35 and 250 kg.";
+      if (
+        !formData.currentWeight ||
+        isNaN(weightNum) ||
+        weightNum < 35 ||
+        weightNum > 250
+      ) {
+        newErrors.currentWeight =
+          val.currentWeight || "Please enter your current weight between 35 and 250 kg.";
       }
-      if (formData.targetWeight) {
-        const targetNum = parseFloat(formData.targetWeight);
-        if (isNaN(targetNum) || targetNum < 35 || targetNum > 250) {
-          newErrors.targetWeight = val.targetWeight || "Target weight must be between 35 and 250 kg.";
-        }
+    } else if (step === 2) {
+      // Program, Duration, Student
+      if (!formData.program || !isValidProgramId(formData.program)) {
+        newErrors.program = val.program || "Please select a coaching program.";
       }
-      if (!formData.goal) {
-        newErrors.goal = val.goal || "Please select your primary fitness goal.";
+      if (!formData.duration || !isValidDurationId(formData.duration)) {
+        newErrors.duration = val.duration || "Please select a subscription duration.";
       }
-      if (!formData.experience) {
-        newErrors.experience = val.experience || "Please select your training experience level.";
+      if (!formData.student) {
+        newErrors.student = val.student || "Please specify your student status.";
       }
     } else if (step === 3) {
-      if (!formData.trainingLocation) {
-        newErrors.trainingLocation = val.trainingLocation || "Please select your preferred training location.";
-      }
-      if (!formData.daysPerWeek) {
-        newErrors.daysPerWeek = val.daysPerWeek || "Please select your available training days per week.";
-      }
-      if (!formData.package) {
-        newErrors.package = val.package || "Please select a coaching package.";
+      const isPowerlifting = (formData.program || "powerlifting") === "powerlifting";
+
+      if (isPowerlifting) {
+        // Track A Validation
+        if (!formData.plRpeKnowledge) {
+          newErrors.plRpeKnowledge =
+            val.rpeKnowledge || "Please indicate whether you know the RPE scale.";
+        }
+        if (!formData.plDays) {
+          newErrors.plDays =
+            val.plDays || "Please choose your preferred training days (3, 4, or 5).";
+        }
+        if (!formData.plPreviousCoach) {
+          newErrors.plPreviousCoach =
+            val.plPreviousCoach ||
+            "Please indicate whether you have worked with a coach before.";
+        }
+        if (!formData.plWhyRdwan || formData.plWhyRdwan.trim().length < 5) {
+          newErrors.plWhyRdwan =
+            val.plWhyRdwan || "Please tell us what made you choose Coach Rdwan.";
+        }
+        if (!formData.plCalorieKnowledge) {
+          newErrors.plCalorieKnowledge =
+            val.plCalorieKnowledge ||
+            "Please indicate whether you know how to calculate calories.";
+        }
+      } else {
+        // Track B Validation
+        if (!formData.bbGoal) {
+          newErrors.bbGoal =
+            val.bbGoal || "Please select your desired goal.";
+        }
+        if (!formData.bbDays) {
+          newErrors.bbDays =
+            val.bbDays || "Please choose your preferred training days (3, 4, or 5).";
+        }
+        if (!formData.bbWhyRdwan || formData.bbWhyRdwan.trim().length < 5) {
+          newErrors.bbWhyRdwan =
+            val.bbWhyRdwan || "Please tell us what made you choose Coach Rdwan.";
+        }
+        if (!formData.bbPreviousCoach) {
+          newErrors.bbPreviousCoach =
+            val.bbPreviousCoach ||
+            "Please indicate whether you have worked with a coach before.";
+        }
+        if (!formData.bbCalorieKnowledge) {
+          newErrors.bbCalorieKnowledge =
+            val.bbCalorieKnowledge ||
+            "Please indicate whether you know how to calculate calories.";
+        }
       }
     } else if (step === 4) {
       if (!formData.consent) {
-        newErrors.consent = val.consent || "Please agree to the consent statement to complete this demo application.";
+        newErrors.consent =
+          val.consent || "Please agree to the confirmation statement to submit.";
       }
     }
 
@@ -252,32 +266,132 @@ export default function BookingForm() {
 
   const handleBack = () => {
     setErrors({});
+    setSubmitError(null);
     setCurrentStep((prev) => Math.max(prev - 1, 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const goToStep = (step) => {
     setErrors({});
+    setSubmitError(null);
     setCurrentStep(step);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep(4)) return;
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
-    // Simulate frontend asynchronous processing
-    setTimeout(() => {
+    setSubmitError(null);
+
+    const isPowerlifting = formData.program === "powerlifting";
+    const isStudent = formData.student === "yes";
+    const approvedPrice = getExactPrice(formData.program, formData.duration, isStudent);
+
+    // Build clean submission payload containing ONLY active program questions
+    const cleanPayload = {
+      timestamp: new Date().toISOString(),
+      athlete: {
+        fullName: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        age: parseInt(formData.age, 10),
+        height: parseFloat(formData.height),
+        currentWeight: parseFloat(formData.currentWeight),
+      },
+      subscription: {
+        program: formData.program,
+        duration: formData.duration,
+        isStudent,
+        priceAmount: approvedPrice,
+        currency: PRICING_CONFIG.currencyCode,
+      },
+      questionnaire: isPowerlifting
+        ? {
+            squatWeight: formData.plSquatWeight || null,
+            squatTechnique: formData.plSquatTechnique || null,
+            benchWeight: formData.plBenchWeight || null,
+            fingerPlacement: formData.plFingerPlacement || null,
+            deadliftWeight: formData.plDeadliftWeight || null,
+            deadliftTechnique: formData.plDeadliftTechnique || null,
+            rpeKnowledge: formData.plRpeKnowledge,
+            preferredDays: Number(formData.plDays),
+            previousCoachExperience: formData.plPreviousCoach,
+            reasonForChoosingCoach: formData.plWhyRdwan.trim(),
+            knowsCalorieCalculation: formData.plCalorieKnowledge,
+            championshipExperience: formData.plCompetition || null,
+          }
+        : {
+            desiredGoal: formData.bbGoal,
+            preferredDays: Number(formData.bbDays),
+            activityLevel: formData.bbActivityLevel || null,
+            reasonForChoosingCoach: formData.bbWhyRdwan.trim(),
+            previousCoachExperience: formData.bbPreviousCoach,
+            knowsCalorieCalculation: formData.bbCalorieKnowledge,
+          },
+      additional: {
+        instagram: formData.instagram ? formData.instagram.trim() : null,
+        notes: formData.additionalNotes ? formData.additionalNotes.trim() : null,
+      },
+    };
+
+    try {
+      const res = await fetch("/api/athlete-registration", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await res.json().catch(() => null);
+
+      if (res.ok && result?.success) {
+        setSubmissionPayload(cleanPayload);
+        try {
+          sessionStorage.removeItem("pt_selected_program");
+          sessionStorage.removeItem("pt_selected_duration");
+          sessionStorage.removeItem("pt_is_student");
+          sessionStorage.removeItem("pt_selected_plan");
+        } catch {}
+        setIsSubmitting(false);
+        setCurrentStep(5); // Success step
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        setIsSubmitting(false);
+        let errorMsg = result?.error;
+        if (locale === "ar") {
+          if (errorMsg === "Unauthorized request.") {
+            errorMsg =
+              "تعذر التحقق من الاتصال بالخادم. يرجى التواصل مباشرة عبر الواتساب لإكمال تسجيلك.";
+          } else if (!errorMsg) {
+            errorMsg =
+              t?.booking?.nav?.submitError ||
+              "حدث خطأ أثناء إرسال طلب التدريب. يرجى التحقق من اتصالك والمحاولة مجددًا، أو التواصل مباشرة عبر الواتساب.";
+          }
+        } else if (!errorMsg) {
+          errorMsg =
+            t?.booking?.nav?.submitError ||
+            "Failed to submit application. Please try again or reach out on WhatsApp.";
+        }
+        setSubmitError(errorMsg);
+      }
+    } catch {
       setIsSubmitting(false);
-      setCurrentStep(5); // Success state
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 1200);
+      setSubmitError(
+        t?.booking?.nav?.submitError ||
+          "Connection error. Please check your internet connection and try again."
+      );
+    }
   };
 
   const handleReset = () => {
     setFormData(INITIAL_FORM_DATA);
     setErrors({});
+    setSubmitError(null);
+    setSubmissionPayload(null);
     setCurrentStep(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -313,7 +427,7 @@ export default function BookingForm() {
               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-brand transition-all duration-400 ease-out"
-                  style={{ width: `${Math.max(progressPct, 10)}%` }}
+                  style={{ width: `${Math.max(progressPct, 12)}%` }}
                 />
               </div>
 
@@ -347,34 +461,6 @@ export default function BookingForm() {
               </div>
             </div>
 
-            {/* Prefilled Calculator Banner Notification */}
-            {hasPrefilled && (
-              <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border-[1.5px] border-brand/30 bg-[color-mix(in_srgb,var(--brand-red)_10%,#191919)] p-3 sm:p-3.5 text-xs font-sans text-foreground">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand text-foreground">
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </span>
-                  <span>
-                    <strong className="font-semibold text-brand">
-                      {t?.booking?.prefillNotice?.tag || "Scientific Baseline Applied:"}
-                    </strong>{" "}
-                    {t?.booking?.prefillNotice?.text ||
-                      "Prefilled with your fitness calculator parameters & caloric target."}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setHasPrefilled(false)}
-                  aria-label={t?.booking?.prefillNotice?.dismiss || "Dismiss notification"}
-                  className="shrink-0 text-muted hover:text-foreground text-xs underline cursor-pointer"
-                >
-                  {t?.booking?.prefillNotice?.dismiss || "Dismiss"}
-                </button>
-              </div>
-            )}
-
             {/* Form Steps */}
             <form onSubmit={handleSubmit} noValidate>
               {currentStep === 1 && (
@@ -386,7 +472,7 @@ export default function BookingForm() {
               )}
 
               {currentStep === 2 && (
-                <Step2FitnessProfile
+                <Step2ProgramSelection
                   data={formData}
                   updateData={updateData}
                   errors={errors}
@@ -394,7 +480,7 @@ export default function BookingForm() {
               )}
 
               {currentStep === 3 && (
-                <Step3TrainingLifestyle
+                <Step3ProgramQuestionnaire
                   data={formData}
                   updateData={updateData}
                   errors={errors}
@@ -409,6 +495,35 @@ export default function BookingForm() {
                   errors={errors}
                   isSubmitting={isSubmitting}
                 />
+              )}
+
+              {/* Submission Error Banner */}
+              {submitError && (
+                <div
+                  role="alert"
+                  className="mt-6 rounded-xl border border-red-500/40 bg-red-950/40 p-4 text-xs sm:text-sm text-red-200 flex items-start gap-3 animate-in fade-in duration-200"
+                >
+                  <svg
+                    className="w-5 h-5 text-red-400 shrink-0 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <div className="flex-1 space-y-1">
+                    <p className="font-semibold text-red-100">
+                      {locale === "ar" ? "تعذر إرسال الطلب" : "Submission Failed"}
+                    </p>
+                    <p className="text-red-300 leading-relaxed">{submitError}</p>
+                  </div>
+                </div>
               )}
 
               {/* Navigation Controls */}
@@ -486,7 +601,7 @@ export default function BookingForm() {
                             d="M4 12a8 8 0 018-8v8H4z"
                           />
                         </svg>
-                        {t?.booking?.nav?.submitting || "Processing..."}
+                        {t?.booking?.nav?.submitting || "Submitting..."}
                       </span>
                     ) : (
                       t?.booking?.nav?.submit || "Submit Application"
@@ -497,7 +612,7 @@ export default function BookingForm() {
             </form>
           </div>
         ) : (
-          <BookingSuccess data={formData} onReset={handleReset} />
+          <BookingSuccess data={formData} payload={submissionPayload} onReset={handleReset} />
         )}
       </div>
     </div>

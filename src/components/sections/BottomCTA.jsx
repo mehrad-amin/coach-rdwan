@@ -7,7 +7,7 @@ import { useLocale } from "@/i18n/LocaleProvider";
 /**
  * Bottom CTA Section (Figma Frame 1000002074 - node 1:1508: 1045x602px)
  * - Ambient radial glow (Ellipse 54 - node 1:1509: 545x545px)
- * - Coach Rdwan portrait photography (rdwan-portrait.jpg)
+ * - Coach Rdwan portrait photography (rdwan-1.jpg)
  * - Heading: "READY TO START YOUR TRAINING JOURNEY?" / "هل أنت مستعد لبدء رحلتك التدريبية؟"
  * - Subtitle: Bilingual personalized coaching copy
  * - Functional CTA Button navigating to "/booking" with action label: "START YOUR JOURNEY" / "ابدأ رحلتك الآن"
@@ -46,22 +46,17 @@ export default function BottomCTA({ className = "" }) {
           {/* 2-Column Split (Figma Frame 1000001695: 1045x602px) */}
           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-14">
             
-            {/* Left Column: Coach Portrait Image (Figma node 1:1511: 466x602px) */}
-            <div className="relative w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[466px] lg:w-[466px] h-[440px] sm:h-[520px] lg:h-[602px] shrink-0">
-              <div className="relative w-full h-full">
+            {/* Coach Portrait Image: Full 3-Panel Vertical Composition (720x1280, 9:16) */}
+            <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[380px] lg:w-[380px] aspect-[9/16] shrink-0">
+              <div className="relative w-full h-full overflow-hidden rounded-[var(--radius-media)]">
                 <Image
-                  src="/images/rdwan/rdwan-portrait.jpg"
+                  src="/images/rdwan/rdwan-1.jpg"
                   alt={cta.imageAlt}
                   fill
                   priority={false}
-                  sizes="(max-width: 640px) 340px, (max-width: 1024px) 400px, 466px"
-                  style={{ objectPosition: "center top" }}
-                  className="object-cover"
-                />
-                {/* Subtle vignette/gradient at bottom to blend with background (Figma Rectangle 4445) */}
-                <div
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background via-background/60 to-transparent"
-                  aria-hidden="true"
+                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 380px"
+                  style={{ objectPosition: "center" }}
+                  className="object-contain"
                 />
               </div>
             </div>

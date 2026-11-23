@@ -2,19 +2,20 @@
 
 import Link from "next/link";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { getPlanById } from "@/data/pricing";
+import { getProgramById, getExactPrice } from "@/data/pricing";
 
 export default function BookingSuccess({ data, onReset }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const success = t?.booking?.success || {};
-  const goals = t?.booking?.step2?.goals || {};
+  const pricing = t?.pricing || {};
 
-  const goalTitle = goals[data.goal]?.title || data.goal || "Fitness Transformation";
-  const plan = getPlanById(data.package);
-  const planInfo = t?.pricing?.plans?.[plan.id] || {};
-  const planTitle = planInfo.name || plan.id;
-  const currency = t?.pricing?.currency || "SAR";
-  const period = t?.pricing?.period || "/month";
+  const programId = data.program || "powerlifting";
+  const durationId = data.duration || "1_month";
+  const isStudent = data.student === "yes";
+  const approvedPrice = getExactPrice(programId, durationId, isStudent);
+
+  const programInfo = pricing.programs?.[programId] || {};
+  const durationLabel = pricing.durationLabels?.[durationId] || durationId;
 
   return (
     <div className="py-6 sm:py-10 text-center space-y-8">
@@ -27,23 +28,19 @@ export default function BookingSuccess({ data, onReset }) {
           stroke="currentColor"
           strokeWidth="2.5"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M5 13l4 4L19 7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       </div>
 
       {/* Main Success Heading */}
-      <div className="space-y-2">
+      <div className="space-y-2 max-w-lg mx-auto">
         <h3 className="font-display font-extrabold uppercase text-2xl sm:text-3xl lg:text-4xl tracking-tight text-foreground">
-          {success.title || "Application Completed!"}
+          {success.title || "Application Submitted Successfully!"}
         </h3>
-        <p className="font-sans text-base sm:text-lg text-muted max-w-lg mx-auto leading-relaxed">
+        <p className="font-sans text-sm sm:text-base text-muted leading-relaxed">
           {success.message
             ? success.message(data.fullName)
-            : `Thank you, ${data.fullName || "Athlete"}! Your coaching request has been simulated and successfully processed.`}
+            : `Thank you, ${data.fullName || "Athlete"}! Your coaching application has been received and Coach Rdwan will contact you via WhatsApp shortly.`}
         </p>
       </div>
 
@@ -52,80 +49,52 @@ export default function BookingSuccess({ data, onReset }) {
         <h4 className="font-display font-bold text-xs uppercase tracking-wider text-muted border-b border-white/10 pb-2">
           {success.summaryTitle || "Application Summary"}
         </h4>
-        <div className="space-y-2 text-xs sm:text-sm">
+        <dl className="space-y-2.5 text-xs sm:text-sm font-sans">
           <div className="flex justify-between items-center">
-            <span className="text-muted">{success.packageLabel || "Selected Package:"}</span>
-            <span className="font-bold text-brand">
-              {planTitle} ({plan.priceAmount} {currency}{period ? ` • ${period}` : ""})
-            </span>
+            <dt className="text-muted">{success.programLabel || "Program:"}</dt>
+            <dd className="font-bold text-foreground">
+              {programInfo.name || programId}
+            </dd>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted">{success.goalLabel || "Primary Goal:"}</span>
-            <span className="font-medium text-foreground">
-              {goalTitle}
-            </span>
+            <dt className="text-muted">{success.durationLabel || "Duration:"}</dt>
+            <dd className="font-medium text-foreground">{durationLabel}</dd>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted">{success.scheduleLabel || "Weekly Schedule:"}</span>
-            <span className="font-medium text-foreground">
-              {data.daysPerWeek
-                ? `${data.daysPerWeek} ${success.daysWeekUnit || "Days/Week"}`
-                : success.flexible || "Flexible"}
-            </span>
+            <dt className="text-muted">{success.priceLabel || "Total Price:"}</dt>
+            <dd className="font-extrabold text-brand" dir="ltr">
+              {approvedPrice} {pricing.currency}
+              {isStudent && (
+                <span className="text-[11px] font-sans font-normal text-muted ms-1.5">
+                  ({locale === "ar" ? "خصم طلاب" : "Student"})
+                </span>
+              )}
+            </dd>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted">{success.contactLabel || "Contact Info:"}</span>
-            <span className="font-medium text-foreground truncate max-w-[200px]" dir="ltr">
-              {data.email}
-            </span>
+          <div className="flex justify-between items-center pt-2 border-t border-white/5">
+            <dt className="text-muted">{success.contactLabel || "Contact Info:"}</dt>
+            <dd className="font-medium text-foreground" dir="ltr">
+              {data.phone}
+            </dd>
           </div>
-        </div>
-      </div>
-
-      {/* Honest Demo Disclaimer */}
-      <div className="max-w-md mx-auto rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center">
-        <p className="inline-flex items-center justify-center gap-1.5 text-xs text-muted font-sans leading-relaxed">
-          <svg
-            className="w-3.5 h-3.5 shrink-0 text-brand inline-block"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-            />
-          </svg>
-          <span>
-            <span className="font-medium text-foreground/80">
-              {success.demoNoticeTag || "Demo notice:"}
-            </span>{" "}
-            {success.demoNoticeText ||
-              "This was an interactive portfolio demonstration. No personal information has been transmitted to external servers, databases, or third-party APIs."}
-          </span>
-        </p>
+        </dl>
       </div>
 
       {/* Action Buttons */}
-      <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
         <Link
           href="/"
-          className="w-full sm:w-auto inline-flex items-center justify-center rounded-control bg-brand px-8 py-4 font-display text-base font-bold uppercase tracking-wider text-foreground shadow-[0_4px_24px_rgba(255,35,50,0.35)] transition-all duration-300 hover:bg-brand-hover hover:shadow-[0_6px_32px_rgba(255,35,50,0.5)] active:scale-95 cursor-pointer"
+          className="inline-flex w-full sm:w-auto items-center justify-center rounded-control bg-brand px-8 py-3.5 font-display text-sm font-bold uppercase tracking-wider text-foreground shadow-[0_4px_20px_rgba(255,35,50,0.35)] transition-all hover:bg-brand-hover active:scale-95 cursor-pointer"
         >
-          {success.returnHome || "Return to Homepage"}
+          {success.returnHome || "Return to Home"}
         </Link>
-        {onReset && (
-          <button
-            type="button"
-            onClick={onReset}
-            className="w-full sm:w-auto inline-flex items-center justify-center rounded-control border border-white/15 px-6 py-4 font-display text-base font-bold uppercase tracking-wider text-muted hover:text-foreground hover:border-white/30 transition-all cursor-pointer"
-          >
-            {success.submitAnother || "Submit Another Demo"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onReset}
+          className="inline-flex w-full sm:w-auto items-center justify-center rounded-control border border-white/15 px-6 py-3.5 font-display text-sm font-bold uppercase tracking-wider text-muted hover:text-foreground hover:border-white/30 transition-all cursor-pointer"
+        >
+          {success.submitAnother || "Submit Another Application"}
+        </button>
       </div>
     </div>
   );
