@@ -282,6 +282,17 @@ const en = {
         extra: null,
         alt: "Podium ceremony for 2nd place finish at Eastern Province Championship 2024",
       },
+      {
+        id: "result-11",
+        placementBadge: "1st Place",
+        championship: "Kingdom Championship // SJR",
+        achievement:
+          "1st Place in the Kingdom 2026, 1st Overall at SJR, and National Records in Squat, Bench Press, and Total.",
+        year: "2026",
+        weightClass: null,
+        extra: "Overall SJR & National Records",
+        alt: "1st Place in the Kingdom 2026, 1st Overall at SJR, and National Records in Squat, Bench Press, and Total.",
+      },
     ],
   },
   testimonials: {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getExactPrice, isValidProgramId, isValidDurationId } from "@/data/pricing";
+import { DEFAULT_COUNTRY_ID, normalizePhoneNumber } from "@/data/countries";
 
 /**
  * Formula injection prevention helper.
@@ -61,14 +62,17 @@ export async function POST(request) {
       );
     }
 
-    const phone = sanitizeSpreadsheetCell(body.phone);
-    const phoneDigits = phone.replace(/\D/g, "");
-    if (!phone || phoneDigits.length < 8) {
+    const rawPhone = body.phone || body.phoneRaw || "";
+    const phoneCountry = body.phoneCountry || DEFAULT_COUNTRY_ID;
+    const phoneNorm = normalizePhoneNumber(rawPhone, phoneCountry);
+
+    if (!rawPhone || !phoneNorm.isValid) {
       return NextResponse.json(
-        { success: false, error: "A valid phone / WhatsApp number is required (min 8 digits)." },
+        { success: false, error: "A valid phone / WhatsApp number is required." },
         { status: 400 }
       );
     }
+    const phone = sanitizeSpreadsheetCell(phoneNorm.normalized);
 
     const email = sanitizeSpreadsheetCell(body.email);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

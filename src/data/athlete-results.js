@@ -186,4 +186,30 @@ export const ATHLETE_RESULTS_DATA = [
       en: "2nd Place — Eastern Province Championship",
     },
   },
+  {
+    id: "result-11",
+    image: "/images/rdwan/athlete-results/result-11.jpg",
+    width: 739,
+    height: 1280,
+    aspect: "portrait",
+    rank: 1,
+    year: "2026",
+    weightClass: null,
+    extra: {
+      ar: "Overall SJR & أرقام قياسية وطنية",
+      en: "Overall SJR & National Records",
+    },
+    placement: {
+      ar: "المركز الأول",
+      en: "1st Place",
+    },
+    championship: {
+      ar: "على مستوى المملكة // بطولة SJR",
+      en: "Kingdom Championship // SJR",
+    },
+    title: {
+      ar: "المركز الأول على المملكة 2026، والمركز الأول Overall في بطولة SJR، مع تحقيق أرقام قياسية وطنية في السكوات والبنش والمجموع.",
+      en: "1st Place in the Kingdom 2026, 1st Overall at SJR, and National Records in Squat, Bench Press, and Total.",
+    },
+  },
 ];

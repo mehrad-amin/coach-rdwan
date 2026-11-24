@@ -1,10 +1,46 @@
 "use client";
 
 import { useLocale } from "@/i18n/LocaleProvider";
+import {
+  SUPPORTED_COUNTRIES,
+  DEFAULT_COUNTRY_ID,
+  getCountryById,
+  normalizePhoneNumber,
+} from "@/data/countries";
 
 export default function Step1PersonalInfo({ data, updateData, errors }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const step1 = t?.booking?.step1 || {};
+
+  const currentCountryId = data.phoneCountry || DEFAULT_COUNTRY_ID;
+  const currentCountry = getCountryById(currentCountryId);
+
+  const handleCountryChange = (e) => {
+    const newCountryId = e.target.value;
+    const raw = data.phoneRaw !== undefined ? data.phoneRaw : data.phone || "";
+    const norm = normalizePhoneNumber(raw, newCountryId);
+    updateData({
+      phoneCountry: newCountryId,
+      phone: norm.normalized,
+    });
+  };
+
+  const handlePhoneChange = (e) => {
+    const raw = e.target.value;
+    const norm = normalizePhoneNumber(raw, currentCountryId);
+    const updates = {
+      phoneRaw: raw,
+      phone: norm.normalized,
+    };
+    if (
+      norm.countryId &&
+      norm.countryId !== currentCountryId &&
+      (raw.trim().startsWith("+") || raw.trim().startsWith("00"))
+    ) {
+      updates.phoneCountry = norm.countryId;
+    }
+    updateData(updates);
+  };
 
   return (
     <div className="space-y-6">
@@ -57,7 +93,7 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
             )}
           </div>
 
-          {/* WhatsApp Phone Number */}
+          {/* WhatsApp Phone Number with Country Calling Code Selector */}
           <div>
             <label
               htmlFor="phone"
@@ -66,22 +102,59 @@ export default function Step1PersonalInfo({ data, updateData, errors }) {
               {step1.phoneLabel || "WhatsApp Phone Number"}{" "}
               <span className="text-brand font-bold">*</span>
             </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              dir="ltr"
-              value={data.phone || ""}
-              onChange={(e) => updateData({ phone: e.target.value })}
-              placeholder={step1.phonePlaceholder || "+966 50 000 0000"}
-              aria-invalid={Boolean(errors.phone)}
-              aria-describedby={errors.phone ? "phone-error" : undefined}
-              className={`w-full rounded-xl bg-background px-4 py-3 text-sm text-foreground placeholder-white/30 border transition-colors outline-none focus:ring-1 ${
-                errors.phone
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                  : "border-white/15 focus:border-brand focus:ring-brand"
-              }`}
-            />
+            <div className="flex gap-2 sm:gap-2.5 items-center">
+              {/* Country Calling Code Selector */}
+              <div className="relative shrink-0 w-[98px] sm:w-[120px]">
+                <select
+                  id="phoneCountry"
+                  name="phoneCountry"
+                  value={currentCountryId}
+                  onChange={handleCountryChange}
+                  aria-label={locale === "ar" ? "رمز الدولة" : "Country calling code"}
+                  className={`w-full appearance-none rounded-xl bg-background px-3 py-3 pe-7 text-xs sm:text-sm font-medium text-foreground border transition-colors outline-none cursor-pointer truncate ${
+                    errors.phone
+                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                      : "border-white/15 focus:border-brand focus:ring-1 focus:ring-brand"
+                  }`}
+                >
+                  {SUPPORTED_COUNTRIES.map((c) => (
+                    <option
+                      key={c.id}
+                      value={c.id}
+                      className="bg-[#141414] text-foreground py-1 text-xs sm:text-sm"
+                    >
+                      {c.flag} {c.callingCode} ({locale === "ar" ? c.name.ar : c.name.en})
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2 text-muted">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Phone Input */}
+              <div className="flex-1 min-w-0">
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  dir="ltr"
+                  inputMode="tel"
+                  value={data.phoneRaw !== undefined ? data.phoneRaw : data.phone || ""}
+                  onChange={handlePhoneChange}
+                  placeholder={currentCountry.placeholder || "50 000 0000"}
+                  aria-invalid={Boolean(errors.phone)}
+                  aria-describedby={errors.phone ? "phone-error" : undefined}
+                  className={`w-full rounded-xl bg-background px-4 py-3 text-sm text-foreground placeholder-white/30 border transition-colors outline-none focus:ring-1 ${
+                    errors.phone
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      : "border-white/15 focus:border-brand focus:ring-brand"
+                  }`}
+                />
+              </div>
+            </div>
             {errors.phone && (
               <p id="phone-error" className="mt-1.5 text-xs text-red-400 font-medium">
                 {errors.phone}

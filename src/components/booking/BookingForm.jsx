@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { PRICING_CONFIG, getExactPrice, isValidProgramId, isValidDurationId } from "@/data/pricing";
+import { DEFAULT_COUNTRY_ID, normalizePhoneNumber } from "@/data/countries";
 import Step1PersonalInfo from "./Step1PersonalInfo";
 import Step2ProgramSelection from "./Step2ProgramSelection";
 import Step3ProgramQuestionnaire from "./Step3ProgramQuestionnaire";
@@ -13,6 +14,8 @@ const INITIAL_FORM_DATA = {
   // Step 1: Basic Athlete Information
   fullName: "",
   phone: "",
+  phoneRaw: "",
+  phoneCountry: DEFAULT_COUNTRY_ID,
   email: "",
   age: "",
   height: "",
@@ -147,10 +150,16 @@ export default function BookingForm() {
       }
 
       // 2. WhatsApp Phone Number
-      const phoneDigits = (formData.phone || "").replace(/\D/g, "");
-      if (!formData.phone || phoneDigits.length < 8) {
+      const rawPhone =
+        formData.phoneRaw !== undefined ? formData.phoneRaw : formData.phone || "";
+      const countryId = formData.phoneCountry || DEFAULT_COUNTRY_ID;
+      const phoneNorm = normalizePhoneNumber(rawPhone, countryId);
+
+      if (!rawPhone || !phoneNorm.isValid) {
         newErrors.phone =
-          val.phone || "Please enter a valid WhatsApp phone number (min 8 digits).";
+          val.phone || "Please enter a valid WhatsApp phone number.";
+      } else {
+        formData.phone = phoneNorm.normalized;
       }
 
       // 3. Email
@@ -285,6 +294,15 @@ export default function BookingForm() {
 
     setIsSubmitting(true);
     setSubmitError(null);
+
+    // Ensure phone is normalized
+    const phoneNorm = normalizePhoneNumber(
+      formData.phoneRaw !== undefined ? formData.phoneRaw : formData.phone || "",
+      formData.phoneCountry || DEFAULT_COUNTRY_ID
+    );
+    if (phoneNorm.isValid) {
+      formData.phone = phoneNorm.normalized;
+    }
 
     const isPowerlifting = formData.program === "powerlifting";
     const isStudent = formData.student === "yes";
