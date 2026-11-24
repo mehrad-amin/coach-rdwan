@@ -291,84 +291,91 @@ const en = {
     prevLabel: "Previous review",
     nextLabel: "Next review",
     slideOfLabel: (index, total, label) => `${index} of ${total}: ${label}`,
-    items: [
-      {
-        id: "powerlifting",
-        quote:
-          "Training with Rdwan highlights the difference between random workouts and truly structured coaching. His technical precision and powerlifting depth bring immense clarity and confidence to strength progression.",
-        label: "Powerlifting Expertise",
+    emptyState: "No published reviews yet. Be the first to share your experience with Coach Rdwan!",
+    writeReviewButton: "Share Your Review",
+    modal: {
+      title: "Share Your Experience with Coach Rdwan",
+      description: "Your genuine feedback helps prospective athletes understand what training with Rdwan is like.",
+      nameLabel: "Display Name",
+      namePlaceholder: "e.g., Abdullah Mohammed",
+      ratingLabel: "Overall Rating",
+      reviewLabel: "Your Review & Results",
+      reviewPlaceholder: "Describe your experience training with Coach Rdwan, programming quality, and coach support...",
+      consentLabel: "I consent to having my review and display name published on Coach Rdwan's website.",
+      submitButton: "Submit Review",
+      submittingButton: "Submitting...",
+      closeButton: "Close",
+      cancelButton: "Cancel",
+      successTitle: "Review Received Successfully",
+      successMessage: "Thank you for sharing your experience! Your review has been submitted and will appear publicly once approved.",
+      errorMessage: "An error occurred while submitting your review. Please try again later.",
+      pendingConfigMessage: "The review submission service is currently being configured and will be available soon.",
+      validation: {
+        nameRequired: "Please enter your display name (at least 2 characters).",
+        ratingRequired: "Please select a rating between 1 and 5 stars.",
+        reviewRequired: "Please write your review (at least 10 characters).",
+        consentRequired: "Please consent to publishing your review to proceed.",
       },
-      {
-        id: "personalized-programming",
-        quote:
-          "What sets Rdwan apart is how meticulously he tailors the program to individual baselines and targets. Workouts are structured, the roadmap is clear, and every block serves a deliberate purpose.",
-        label: "Tailored Programming",
-      },
-      {
-        id: "technique-guidance",
-        quote:
-          "His focus on technical execution and detailed video analysis is phenomenal. He spots subtle biomechanical details that dramatically improve safety, efficiency, and lifting confidence.",
-        label: "Technique Guidance",
-      },
-      {
-        id: "ongoing-support",
-        quote:
-          "Rdwan combines elite competitive experience with dedicated mentorship. His steady accountability and prompt feedback make the training experience motivating, structured, and consistent.",
-        label: "Consistent Support",
-      },
-    ],
+    },
+    items: [],
   },
   faq: {
     heading: "Frequently Asked Questions",
     subtitle: "I'm here to help!",
     items: [
       {
-        id: "online-coaching",
-        question: "Is coaching with Rdwan completely online?",
+        id: "remote-custom-coaching",
+        question: "Can I get a fully personalized training program without having to train in person at the gym with you?",
         answer:
-          "Yes, all coaching is conducted online. You receive a personalized training plan tailored to your goals and baseline, with ongoing guidance and communication to ensure steady progress.",
+          "Yes, the coaching is conducted entirely remotely, but that does not mean you will receive a generic plan. I will design a program tailored to your fitness level, goals, capabilities, and daily routine, while continuously tracking your progress and adjusting the program based on your body's response.",
       },
       {
-        id: "beginners",
-        question: "Can beginners join the coaching program?",
+        id: "beginners-welcome",
+        question: "Can I start training with you even if I'm a beginner with no prior experience?",
         answer:
-          "Absolutely. Programs are designed around your current experience level, whether you're completely new to lifting or returning after a break, ensuring safe and progressive development.",
+          "Definitely. Prior experience is not required. We will start from your current level and build a solid training foundation, with focused attention on learning proper technique and gradual weight progression to ensure steady improvement.",
       },
       {
-        id: "training-goals",
-        question: "What goals can I achieve through coaching?",
+        id: "training-achievements",
+        question: "What can I achieve through training with you?",
         answer:
-          "You can work toward building maximal strength, gaining lean muscle, cutting body fat, or improving overall athletic conditioning with a program customized to your lifestyle.",
+          "Whether your goal is to build strength, gain muscle mass, improve body composition, or prepare for competitions, I will work with you to establish a clear, tailored plan for your objective and track your progress consistently to achieve the best possible result.",
       },
       {
-        id: "powerlifting",
-        question: "Do you offer specialized powerlifting coaching?",
+        id: "powerlifting-bodybuilding",
+        question: "Do you offer specialized programs in powerlifting and bodybuilding?",
         answer:
-          "Yes. Specialized powerlifting programming is available, focusing on strength development, technique mastery on the squat, bench press, and deadlift, and optional meet preparation.",
+          "Yes, I provide specialized training programs in both disciplines, taking into account the unique requirements of each sport. Whether your goal is to increase your numbers in the squat, bench press, and deadlift, or build muscle mass and enhance muscular symmetry, the program will be built around your specific needs and goals.",
       },
       {
-        id: "calories-nutrition",
-        question: "Does coaching include calorie and nutrition guidance?",
+        id: "nutrition-macronutrients",
+        question: "Will I receive nutritional guidance and a calculation of my caloric and macronutrient needs?",
         answer:
-          "Yes. Your daily caloric targets and macronutrient distributions are calculated and adjusted to support your primary objective, whether building muscle, losing fat, or peaking performance.",
+          "Yes, I will help you determine your caloric and macronutrient requirements (protein, carbohydrates, and fats) aligned with your training goals, guiding you toward a sustainable nutrition approach that supports your performance and recovery.",
       },
       {
-        id: "exercise-technique",
-        question: "How is exercise technique reviewed and corrected?",
+        id: "technique-video-review",
+        question: "How is my performance reviewed and exercise technique verified?",
         answer:
-          "You submit training videos of your key working sets. Coach Rdwan provides detailed feedback, cues, and adjustments to improve biomechanics, efficiency, and lifting safety.",
+          "One of my top priorities is ensuring that you don't just perform the exercises, but execute them in the way that is right for you. Your submitted video clips will be reviewed, and you will receive clear feedback and corrections to help improve your technique and understand your mistakes.",
       },
       {
-        id: "support-communication",
-        question: "How do I communicate with Coach Rdwan during training?",
+        id: "coach-communication-support",
+        question: "Can I contact you if I face an issue or need adjustments to my program?",
         answer:
-          "Direct communication is handled via WhatsApp for ongoing support, check-ins, answering questions, and resolving any training challenges as they arise.",
+          "Definitely. Coaching is not just about sending a schedule and waiting for results. It is important to me to remain accessible to help you understand your program and answer your questions at all times.",
       },
       {
         id: "student-discount",
-        question: "Is there a student discount available?",
+        question: "Are there special rates or discounts for students?",
         answer:
-          "Yes, a 20% student discount is available across coaching programs upon verification of student status.",
+          "Yes, I appreciate the importance of making quality coaching accessible to everyone, which is why special rates and a -20% discount are available for students.",
+      },
+      {
+        id: "schedule-flexibility",
+        question: "What if I struggle to adhere to the program due to work pressure or tight schedules?",
+        answer:
+          "I understand that life doesn't always follow a fixed schedule. That's why I make sure your program is realistic and feasible according to your circumstances and commitments. If your schedule changes or you face difficulty staying consistent, we can discuss appropriate adjustments so you maintain your progress without losing momentum.",
       },
     ],
   },
@@ -575,6 +582,7 @@ const en = {
       phoneLabel: "Phone",
       whatsappLabel: "WhatsApp",
       instagramLabel: "Instagram",
+      xLabel: "X (Twitter)",
     },
     copyright: (year) => `© ${year} ${BRAND_NAMES.en}. All rights reserved.`,
     developerCredit: {

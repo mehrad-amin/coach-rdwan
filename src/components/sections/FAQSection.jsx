@@ -4,57 +4,63 @@ import { useState } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
 
 /**
- * 8 verified coaching FAQs personalized for Coach Rdwan.
+ * 9 verified coaching FAQs personalized for Coach Rdwan.
  * Defaults to English; localized via useLocale() and i18n dictionaries.
  */
 export const DEFAULT_FAQS = [
   {
-    id: "online-coaching",
-    question: "Is coaching with Rdwan entirely online?",
+    id: "remote-custom-coaching",
+    question: "Can I get a fully personalized training program without having to train in person at the gym with you?",
     answer:
-      "Yes. Coaching is delivered online, with a personalized training program based on your goals and experience, along with ongoing guidance to help you stay consistent and progress.",
+      "Yes, the coaching is conducted entirely remotely, but that does not mean you will receive a generic plan. I will design a program tailored to your fitness level, goals, capabilities, and daily routine, while continuously tracking your progress and adjusting the program based on your body's response.",
   },
   {
-    id: "beginners",
-    question: "Can I join if I'm a complete beginner?",
+    id: "beginners-welcome",
+    question: "Can I start training with you even if I'm a beginner with no prior experience?",
     answer:
-      "Absolutely. Your program is tailored to your current fitness level and experience, whether you're just starting out or have been training for years.",
+      "Definitely. Prior experience is not required. We will start from your current level and build a solid training foundation, with focused attention on learning proper technique and gradual weight progression to ensure steady improvement.",
   },
   {
-    id: "training-goals",
-    question: "What goals can I work toward with this coaching?",
+    id: "training-achievements",
+    question: "What can I achieve through training with you?",
     answer:
-      "You can focus on building strength, gaining muscle, losing fat, or improving overall fitness, with a program tailored to your specific goals and needs.",
+      "Whether your goal is to build strength, gain muscle mass, improve body composition, or prepare for competitions, I will work with you to establish a clear, tailored plan for your objective and track your progress consistently to achieve the best possible result.",
   },
   {
-    id: "powerlifting",
-    question: "Do you offer specialized powerlifting programs?",
+    id: "powerlifting-bodybuilding",
+    question: "Do you offer specialized programs in powerlifting and bodybuilding?",
     answer:
-      "Yes. Specialized powerlifting programs are available to help develop strength and improve your squat, bench press, and deadlift performance based on your current level and training needs.",
+      "Yes, I provide specialized training programs in both disciplines, taking into account the unique requirements of each sport. Whether your goal is to increase your numbers in the squat, bench press, and deadlift, or build muscle mass and enhance muscular symmetry, the program will be built around your specific needs and goals.",
   },
   {
-    id: "calories-nutrition",
-    question: "Does coaching include calorie and nutrition guidance?",
+    id: "nutrition-macronutrients",
+    question: "Will I receive nutritional guidance and a calculation of my caloric and macronutrient needs?",
     answer:
-      "Yes. Your calorie requirements and macronutrient targets are calculated according to your goals, whether you're aiming to build muscle, lose fat, or improve performance.",
+      "Yes, I will help you determine your caloric and macronutrient requirements (protein, carbohydrates, and fats) aligned with your training goals, guiding you toward a sustainable nutrition approach that supports your performance and recovery.",
   },
   {
-    id: "exercise-technique",
-    question: "How is my exercise technique reviewed and corrected?",
+    id: "technique-video-review",
+    question: "How is my performance reviewed and exercise technique verified?",
     answer:
-      "You can submit videos of your exercises for review. Rdwan will provide feedback and guidance to help you improve your technique and train more safely and effectively.",
+      "One of my top priorities is ensuring that you don't just perform the exercises, but execute them in the way that is right for you. Your submitted video clips will be reviewed, and you will receive clear feedback and corrections to help improve your technique and understand your mistakes.",
   },
   {
-    id: "support-communication",
-    question: "Can I contact Rdwan if I have questions or difficulties during training?",
+    id: "coach-communication-support",
+    question: "Can I contact you if I face an issue or need adjustments to my program?",
     answer:
-      "Yes. You can reach out via WhatsApp for coaching support, questions about your training program, and guidance when you encounter challenges along the way.",
+      "Definitely. Coaching is not just about sending a schedule and waiting for results. It is important to me to remain accessible to help you understand your program and answer your questions at all times.",
   },
   {
     id: "student-discount",
-    question: "Is there a discount available for students?",
+    question: "Are there special rates or discounts for students?",
     answer:
-      "Yes. Students are eligible for a 25% discount on coaching services, subject to verification of student status.",
+      "Yes, I appreciate the importance of making quality coaching accessible to everyone, which is why special rates and a -20% discount are available for students.",
+  },
+  {
+    id: "schedule-flexibility",
+    question: "What if I struggle to adhere to the program due to work pressure or tight schedules?",
+    answer:
+      "I understand that life doesn't always follow a fixed schedule. That's why I make sure your program is realistic and feasible according to your circumstances and commitments. If your schedule changes or you face difficulty staying consistent, we can discuss appropriate adjustments so you maintain your progress without losing momentum.",
   },
 ];
 

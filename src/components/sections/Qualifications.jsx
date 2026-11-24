@@ -43,7 +43,7 @@ export default function Qualifications({ className = "" }) {
           <div className="mx-auto w-full max-w-[340px] sm:max-w-[380px] ltr:lg:col-start-2 rtl:lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:mx-0 lg:w-[375px] lg:max-w-none lg:self-center desktop:w-[396px]">
             <div className="group relative aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-media)] bg-[#141414] shadow-[var(--shadow-card)]">
               <Image
-                src="/images/rdwan/rdwan-3.jpg"
+                src="/images/rdwan/rdwan-2.jpg"
                 alt={imageAlt}
                 fill
                 priority
