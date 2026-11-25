@@ -390,6 +390,15 @@ const en = {
       },
     ],
   },
+  tvInterview: {
+    heading: "Rdwan on Television",
+    subtitle: "The Fine Line Between Physical Activity and Athletic Fatigue",
+    description:
+      "An exclusive television interview where Rdwan discusses physical activity, athletic fatigue, and his experience in fitness and sports coaching.",
+    playLabel: "Play TV interview video: The Fine Line Between Physical Activity and Athletic Fatigue",
+    thumbnailAlt: "Thumbnail for Rdwan's television interview: The Fine Line Between Physical Activity and Athletic Fatigue",
+    iframeTitle: "The Fine Line Between Physical Activity and Athletic Fatigue — Coach Rdwan TV Interview",
+  },
   cta: {
     heading: "READY TO START YOUR TRAINING JOURNEY?",
     description:

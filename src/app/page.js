@@ -7,6 +7,7 @@ import AthleteResults from "@/components/sections/AthleteResults";
 import TrainingPrograms from "@/components/sections/TrainingPrograms";
 import Testimonials from "@/components/sections/Testimonials";
 import FAQSection from "@/components/sections/FAQSection";
+import TVInterview from "@/components/sections/TVInterview";
 import BottomCTA from "@/components/sections/BottomCTA";
 import Footer from "@/components/sections/Footer";
 
@@ -24,6 +25,7 @@ export default function Home() {
         <TrainingPrograms />
         <Testimonials />
         <FAQSection />
+        <TVInterview />
         <BottomCTA />
       </main>
       <Footer />
